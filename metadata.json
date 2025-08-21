@@ -1,0 +1,5 @@
+{
+  "name": "Residential Load Diversity Calculator",
+  "description": "A tool to calculate connected and diversified natural gas loads for single-family residences.",
+  "requestFramePermissions": []
+}
