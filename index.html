@@ -19,136 +19,225 @@
 <body>
     <header>
         <h1>Residential Load Diversity Calculator</h1>
-        <p>For Single-Family Residences in Maine & New England</p>
-        <p class="attribution">By: Tim Bickford Rev 1.1 (08/21/2025)</p>
+        <p>For Single-Family Residences in Maine, New Hampshire and Massachusetts</p>
+        <p class="attribution">By: Tim Bickford Rev 1.2 (08/26/2025)</p>
     </header>
 
     <main>
-        <form id="calculator-form" onsubmit="return false;">
-            <section id="project-info" aria-labelledby="project-info-heading">
-                <h2 id="project-info-heading">Project Information</h2>
-                <div class="grid-container">
-                    <div class="form-group">
-                        <label for="project-name">Project Name</label>
-                        <input type="text" id="project-name" name="projectName" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="doc">DOC (Distribution Operating Company)</label>
-                        <select id="doc" name="doc" required>
-                            <option value="Unitil (NU-NH)">Unitil (NU-NH)</option>
-                            <option value="Unitil (NU-ME)">Unitil (NU-ME)</option>
-                            <option value="F.W. Webb (FG&E)">F.W. Webb (FG&E)</option>
-                            <option value="Bangor Natural Gas (BNG)">Bangor Natural Gas (BNG)</option>
-                            <option value="Maine Natural Gas (MNG)">Maine Natural Gas (MNG)</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="street-address">Street Number & Name</label>
-                        <input type="text" id="street-address" name="streetAddress" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="town">Town</label>
-                        <input type="text" id="town" name="town" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="state">State</label>
-                        <select id="state" name="state" required>
-                            <option value="ME">ME</option>
-                            <option value="NH">NH</option>
-                            <option value="MA">MA</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="g-intake">G-Intake Number</label>
-                        <input type="text" id="g-intake" name="gIntake">
-                    </div>
-                    <div class="form-group">
-                        <label for="assessed-by">Assessed by</label>
-                        <input type="text" id="assessed-by" name="assessedBy" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="assessment-date">Assessment Date</label>
-                        <input type="date" id="assessment-date" name="assessmentDate" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="revision-number">Revision Number</label>
-                        <input type="number" id="revision-number" name="revisionNumber" value="0" min="0" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="revision-date">Revision Date</label>
-                        <input type="date" id="revision-date" name="revisionDate" required>
-                    </div>
-                    <div class="form-group full-width">
-                        <label for="project-description">Project Description</label>
-                        <textarea id="project-description" name="projectDescription" rows="4"></textarea>
-                    </div>
-                </div>
-            </section>
+        <div class="tabs">
+            <button class="tab-link active" data-tab="calculator-tab">Calculator</button>
+            <button class="tab-link" data-tab="theory-tab">Load Diversity Theory</button>
+            <button class="tab-link" data-tab="table-tab">Load Diversity Table</button>
+        </div>
 
-            <section id="appliance-section" aria-labelledby="appliance-section-heading">
-                <h2 id="appliance-section-heading">Appliance Input</h2>
-                <div class="appliance-controls">
-                    <div class="form-group">
-                        <label for="gas-energy-content">Gas Energy Content (BTU/SCF)</label>
-                        <input type="number" id="gas-energy-content" value="1000" min="1">
+        <div id="calculator-tab" class="tab-content active">
+            <form id="calculator-form" onsubmit="return false;">
+                <section id="project-info" aria-labelledby="project-info-heading">
+                    <h2 id="project-info-heading">Project Information</h2>
+                    <div class="grid-container">
+                        <div class="form-group">
+                            <label for="project-name">Project Name</label>
+                            <input type="text" id="project-name" name="projectName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="doc">DOC (Distribution Operating Company)</label>
+                            <select id="doc" name="doc" required>
+                                <option value="Unitil (NU-NH)">Unitil (NU-NH)</option>
+                                <option value="Unitil (NU-ME)">Unitil (NU-ME)</option>
+                                <option value="FG&E (Fitchburg Gas & Electric)">FG&E (Fitchburg Gas & Electric)</option>
+                                <option value="Bangor Natural Gas (BNG)">Bangor Natural Gas (BNG)</option>
+                                <option value="Maine Natural Gas (MNG)">Maine Natural Gas (MNG)</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="street-address">Street Number & Name</label>
+                            <input type="text" id="street-address" name="streetAddress" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="town">Town</label>
+                            <input type="text" id="town" name="town" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="state">State</label>
+                            <select id="state" name="state" required>
+                                <option value="ME">ME</option>
+                                <option value="NH">NH</option>
+                                <option value="MA">MA</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="g-intake">G-Intake Number</label>
+                            <input type="text" id="g-intake" name="gIntake">
+                        </div>
+                        <div class="form-group">
+                            <label for="assessed-by">Assessed by</label>
+                            <input type="text" id="assessed-by" name="assessedBy" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="assessment-date">Assessment Date</label>
+                            <input type="date" id="assessment-date" name="assessmentDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="revision-number">Revision Number</label>
+                            <input type="number" id="revision-number" name="revisionNumber" value="0" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="revision-date">Revision Date</label>
+                            <input type="date" id="revision-date" name="revisionDate" required>
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="project-description">Project Description</label>
+                            <textarea id="project-description" name="projectDescription" rows="4"></textarea>
+                        </div>
                     </div>
-                    <button type="button" id="add-appliance-btn" class="button-primary">Add Appliance</button>
-                </div>
-                <div class="appliance-table-container">
-                    <div id="appliance-list-header" class="appliance-row header">
-                        <div>Category</div>
-                        <div>Equipment Type</div>
-                        <div>Max Input Rating</div>
-                        <div>Units</div>
-                        <div>Diversity Factor (%)</div>
-                        <div>Action</div>
-                    </div>
-                    <div id="appliance-list">
-                        <!-- Appliance rows will be dynamically inserted here -->
-                    </div>
-                </div>
-            </section>
+                </section>
 
-            <section id="calculation-section" aria-labelledby="calculation-section-heading">
-                 <h2 id="calculation-section-heading">Calculate & Display Results</h2>
-                <div class="results-controls">
-                    <button type="button" id="calculate-btn" class="button-primary">Calculate</button>
-                    <div class="form-group">
-                        <label for="results-units">Display Units</label>
-                        <select id="results-units">
-                            <option value="BTU/hr">BTU/hr</option>
-                            <option value="MMBTU/hr">MMBTU/hr</option>
-                            <option value="CFH">CFH</option>
-                        </select>
+                <section id="appliance-section" aria-labelledby="appliance-section-heading">
+                    <h2 id="appliance-section-heading">Appliance Input</h2>
+                    <div class="appliance-controls">
+                        <div class="form-group">
+                            <label for="gas-energy-content">Gas Energy Content (BTU/SCF)</label>
+                            <input type="number" id="gas-energy-content" value="1040" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label for="diversity-standard">Diversity Standard</label>
+                            <select id="diversity-standard" name="diversityStandard">
+                                <option value="default">Utility Standard (Default)</option>
+                                <option value="ashrae">ASHRAE (Conservative)</option>
+                                <option value="iapmo">IAPMO (Lenient)</option>
+                            </select>
+                        </div>
+                        <button type="button" id="add-appliance-btn" class="button-primary">Add Appliance</button>
                     </div>
-                </div>
-                <div id="results-display" class="results-container">
-                    <div class="result-item">
-                        <span class="result-label">Total Connected Load:</span>
-                        <span id="total-connected-load" class="result-value">0</span>
+                    <div class="appliance-table-container">
+                        <div id="appliance-list-header" class="appliance-row header">
+                            <div>Category</div>
+                            <div>Equipment Type</div>
+                            <div>Max Input Rating</div>
+                            <div>Units</div>
+                            <div>Diversity Factor (%)</div>
+                            <div>Action</div>
+                        </div>
+                        <div id="appliance-list">
+                            <!-- Appliance rows will be dynamically inserted here -->
+                        </div>
                     </div>
-                    <div class="result-item">
-                        <span class="result-label">Total Diversified Load:</span>
-                        <span id="total-diversified-load" class="result-value">0</span>
-                    </div>
-                </div>
-            </section>
+                </section>
 
-            <section id="file-ops-section" aria-labelledby="file-ops-heading">
-                <h2 id="file-ops-heading">File Operations</h2>
-                <div class="file-buttons">
-                    <button type="button" id="save-btn" class="button-secondary">Save</button>
-                    <button type="button" id="load-btn" class="button-secondary">Load</button>
-                    <input type="file" id="load-input" accept=".json" style="display: none;">
-                    <button type="button" id="export-pdf-btn" class="button-primary">Export to PDF</button>
+                <section id="calculation-section" aria-labelledby="calculation-section-heading">
+                     <h2 id="calculation-section-heading">Calculate & Display Results</h2>
+                    <div class="results-controls">
+                        <button type="button" id="calculate-btn" class="button-primary">Calculate</button>
+                        <div class="form-group">
+                            <label for="results-units">Display Units</label>
+                            <select id="results-units">
+                                <option value="BTU/hr">BTU/hr</option>
+                                <option value="MMBTU/hr">MMBTU/hr</option>
+                                <option value="CFH" selected>CFH</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="results-display" class="results-container">
+                        <div class="result-item">
+                            <span class="result-label">Total Connected Load:</span>
+                            <span id="total-connected-load" class="result-value">0</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Total Diversified Load:</span>
+                            <span id="total-diversified-load" class="result-value">0</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="file-ops-section" aria-labelledby="file-ops-heading">
+                    <h2 id="file-ops-heading">File Operations</h2>
+                    <div class="file-buttons">
+                        <button type="button" id="save-btn" class="button-secondary">Save</button>
+                        <button type="button" id="load-btn" class="button-secondary">Load</button>
+                        <input type="file" id="load-input" accept=".json" style="display: none;">
+                        <button type="button" id="export-pdf-btn" class="button-primary">Export to PDF</button>
+                    </div>
+                </section>
+            </form>
+        </div>
+
+        <div id="theory-tab" class="tab-content">
+            <section id="theory-content">
+                <h2>Understanding Load Diversity in Gas Systems</h2>
+                
+                <h3>What is Load Diversity?</h3>
+                <p>Load diversity is the fundamental principle that not all gas appliances in a building will be operating at their maximum capacity at the exact same time. The total peak demand of a system is almost always less than the sum of the maximum possible demands of all its individual components.<sup>1</sup></p>
+                <p>Think of it like the lights in a house: while a home may have dozens of light bulbs, it's extremely rare for every single one to be switched on simultaneously. Similarly, a furnace, water heater, and oven are unlikely to all be running at their highest setting at the same moment.</p>
+                <p>By accounting for this diversity, engineers can accurately size gas meters and piping systems. This prevents costly oversizing while ensuring the system can safely and reliably meet the building's actual peak demand.<sup>1</sup></p>
+                
+                <h3>The Diversity Factor</h3>
+                <p>A <strong>Diversity Factor</strong> is a percentage applied to an appliance's maximum load (its BTU rating) to estimate its realistic contribution to the system's peak demand.<sup>1</sup> A factor of 100% implies the appliance is expected to run at full capacity during the system's peak, while a lower factor acknowledges it will likely be off or running at partial load.</p>
+                <div class="formula-box">
+                    Diversified Load = Max Input Rating × (Diversity Factor / 100)
                 </div>
+
+                <h3>Rationale for 100% Diversity Factors (Non-Diversifiable Loads)</h3>
+                <p>It may seem counterintuitive to assign a 100% diversity factor, but it is a critical practice for certain types of equipment. These are considered <strong>"non-diversifiable" loads</strong> because they must be able to operate at their full rated capacity whenever they are called upon, regardless of other appliance usage. Undersizing the gas system for these loads could lead to equipment failure when it is needed most.<sup>2</sup></p>
+                <ul>
+                    <li><strong>Life-Safety Equipment:</strong> An emergency generator is a prime example. It is a life-safety device that must have access to its full required fuel supply during a power outage. Its load can never be discounted.<sup>2</sup></li>
+                    <li><strong>Critical High-Demand Utilities:</strong> A driveway boiler for a snow-melt system is a prime example. Unlike a furnace that cycles, a snow-melt system is a mission-critical utility designed to run at 100% of its rated capacity for many hours continuously during a snow or ice storm. Its function is to prevent ice accumulation and maintain safe access, a task that cannot be compromised. When its sensors detect freezing temperatures and moisture, it demands its full fuel supply without interruption. Therefore, gas utility engineering standards mandate that it be treated as a non-diversifiable load to guarantee the system can perform this critical safety function when needed most.<sup>2</sup></li>
+                    <li><strong>Initial High-Demand Loads:</strong> A pool or spa heater, when initially heating a large volume of cold water, will run continuously at 100% capacity for many hours or even days. The system must be able to support this prolonged peak demand.<sup>2</sup></li>
+                </ul>
+
+                <h3>Understanding the Standards</h3>
+                <p>Diversity factors are not arbitrary. They are derived from engineering studies, historical utility data, and established codes. This calculator includes factors from several recognized sources:</p>
+                <ul>
+                    <li><strong>Utility Standard (Default):</strong> A balanced set of factors based on common practices from North American gas utilities. This provides a good general-purpose estimate for typical residential projects and often represents a middle ground.<sup>2</sup></li>
+                    <li><strong>ASHRAE (Conservative):</strong> Factors derived from the American Society of Heating, Refrigerating and Air-Conditioning Engineers (ASHRAE) handbooks, particularly the <em>ASHRAE Handbook—Fundamentals</em>. These values are often higher (more conservative), leading to a larger calculated diversified load. This approach provides a greater margin of safety.<sup>1</sup></li>
+                    <li><strong>IAPMO (Lenient):</strong> Factors related to the International Association of Plumbing and Mechanical Officials (IAPMO), often found in plumbing and gas codes like the Uniform Mechanical Code (UMC). These values can be lower (more lenient), resulting in a smaller calculated load.<sup>3</sup></li>
+                </ul>
+                
+                <h3>A Practical Example</h3>
+                <p>Consider a simple home with three appliances:</p>
+                <ul class="example-list">
+                    <li>Forced Air Furnace: 100,000 BTU/hr (85% Diversity)</li>
+                    <li>Tank Water Heater: 40,000 BTU/hr (40% Diversity)</li>
+                    <li>Gas Range/Oven: 65,000 BTU/hr (10% Diversity)</li>
+                </ul>
+                <p><strong>Total Connected Load:</strong> 100,000 + 40,000 + 65,000 = <strong>205,000 BTU/hr</strong></p>
+                <p><strong>Total Diversified Load Calculation:</strong></p>
+                <ul class="calculation-steps">
+                    <li>Furnace: 100,000 BTU/hr × 0.85 = 85,000 BTU/hr</li>
+                    <li>Water Heater: 40,000 BTU/hr × 0.40 = 16,000 BTU/hr</li>
+                    <li>Range: 65,000 BTU/hr × 0.10 = 6,500 BTU/hr</li>
+                    <li><strong>Total:</strong> 85,000 + 16,000 + 6,500 = <strong>107,500 BTU/hr</strong></li>
+                </ul>
+                <p>As you can see, the expected peak load (107,500 BTU/hr) is significantly less than the total possible load (205,000 BTU/hr). The gas service would be sized based on the diversified load.</p>
+
+                <h3>Important Disclaimer</h3>
+                <p class="disclaimer">This calculator is an estimation tool intended for planning and preliminary assessment. The diversity factors provided are based on common industry standards but may not reflect the specific requirements of your local jurisdiction. <strong>The final authority is always the local utility and the applicable building codes (Authority Having Jurisdiction - AHJ).</strong> Always verify sizing requirements with a qualified professional or your local gas utility before installation.</p>
+                
+                <h3>Sources & References</h3>
+                <ol class="references-list">
+                    <li>
+                        <strong>ASHRAE (American Society of Heating, Refrigerating and Air-Conditioning Engineers) Handbook—Fundamentals:</strong> This is the primary source for the core principles of load diversity, the definition of diversity factors, and the conservative values used in engineering. The methodologies are detailed in chapters covering energy estimating and load calculation.
+                        <a href="https://www.ashrae.org/technical-resources/ashrae-handbook" target="_blank" rel="noopener noreferrer">Learn more about the ASHRAE Handbook</a>
+                    </li>
+                    <li>
+                        <strong>Gas Utility Engineering Standards:</strong> The rationale for 100% diversity factors for life-safety (e.g., generators) and critical high-demand equipment (e.g., pool heaters, snow-melt systems) is a standard practice outlined in the internal engineering manuals of most North American gas utilities. These standards are based on extensive historical usage data and prioritize system reliability and safety.
+                    </li>
+                    <li>
+                        <strong>IAPMO (International Association of Plumbing and Mechanical Officials) Uniform Mechanical Code (UMC):</strong> This code provides the guidelines and requirements for gas piping systems, including sizing tables and rules that implicitly or explicitly account for load diversity. The IAPMO-related factors are derived from the principles within this code.
+                        <a href="https://www.iapmo.org/uniform-codes/uniform-mechanical-code-umc" target="_blank" rel="noopener noreferrer">Explore the Uniform Mechanical Code (UMC)</a>
+                    </li>
+                </ol>
             </section>
-        </form>
+        </div>
+
+        <div id="table-tab" class="tab-content">
+            <!-- Diversity tables will be dynamically inserted here -->
+        </div>
+
     </main>
 
     <footer>
-        <p>Built by a world-class senior frontend engineer.</p>
+        <p>Users should always consult with industry standards as they will change</p>
     </footer>
 
     <script type="module" src="index.tsx"></script>

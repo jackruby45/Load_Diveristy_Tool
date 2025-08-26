@@ -4,8 +4,7 @@ import autoTable from 'jspdf-autotable';
 // --- TYPE DEFINITIONS ---
 interface Equipment {
     name: string;
-    btu: number;
-    diversity: number;
+    diversity: { [standard: string]: number };
 }
 interface ApplianceData {
     [category: string]: Equipment[];
@@ -26,51 +25,85 @@ interface ProjectData {
 }
 
 // --- CONSTANTS ---
+const DIVERSITY_STANDARDS: { [key: string]: string } = {
+    default: "Utility Standard (Default)",
+    ashrae: "ASHRAE (Conservative)",
+    iapmo: "IAPMO (Lenient)"
+};
+
 const APPLIANCE_DATA: ApplianceData = {
     "Heating": [
-        { name: "Forced Air Furnace (<225k BTU/hr)", btu: 120000, diversity: 85 },
-        { name: "Forced Air Furnace (>225k BTU/hr)", btu: 250000, diversity: 85 },
-        { name: "Hydronic Boiler (<300k BTU/hr)", btu: 150000, diversity: 85 },
-        { name: "Hydronic Boiler (>300k BTU/hr)", btu: 350000, diversity: 85 },
+        { name: "Forced Air Furnace (<225k BTU/hr)", diversity: { default: 75, ashrae: 90, iapmo: 70 } },
+        { name: "Forced Air Furnace (>225k BTU/hr)", diversity: { default: 70, ashrae: 85, iapmo: 65 } },
+        { name: "Hydronic Boiler (<300k BTU/hr)", diversity: { default: 75, ashrae: 90, iapmo: 70 } },
+        { name: "Hydronic Boiler (>300k BTU/hr)", diversity: { default: 70, ashrae: 85, iapmo: 65 } },
+        { name: "Combination Boiler (Combi)", diversity: { default: 80, ashrae: 85, iapmo: 75 } },
+        { name: "Unit Heater (e.g., Garage)", diversity: { default: 75, ashrae: 80, iapmo: 70 } },
+        { name: "Direct-Vent Wall Furnace", diversity: { default: 75, ashrae: 85, iapmo: 70 } },
+        { name: "Radiant Tube Heater", diversity: { default: 90, ashrae: 95, iapmo: 85 } },
+        { name: "Rooftop Unit (RTU)", diversity: { default: 90, ashrae: 95, iapmo: 85 } },
+        { name: "Makeup Air Unit (MUA)", diversity: { default: 100, ashrae: 100, iapmo: 100 } },
+        { name: "Driveway Boiler", diversity: { default: 100, ashrae: 100, iapmo: 100 } },
     ],
     "Hot Water": [
-        { name: "Tank Water Heater (<50 gal)", btu: 40000, diversity: 40 },
-        { name: "Tank Water Heater (50-100 gal)", btu: 75000, diversity: 40 },
-        { name: "On-Demand Water Heater", btu: 199000, diversity: 15 },
+        { name: "Tank Water Heater (<50 gal)", diversity: { default: 35, ashrae: 50, iapmo: 30 } },
+        { name: "Tank Water Heater (50-100 gal)", diversity: { default: 30, ashrae: 45, iapmo: 25 } },
+        { name: "Tank Water Heater (>100 gal)", diversity: { default: 25, ashrae: 40, iapmo: 20 } },
+        { name: "Power-Vent Water Heater", diversity: { default: 35, ashrae: 50, iapmo: 30 } },
+        { name: "On-Demand Water Heater", diversity: { default: 25, ashrae: 30, iapmo: 20 } },
+        { name: "Indirect Water Heater (from Boiler)", diversity: { default: 20, ashrae: 30, iapmo: 15 } },
+        { name: "Booster Heater", diversity: { default: 20, ashrae: 25, iapmo: 15 } },
     ],
     "Cooking": [
-        { name: "Range/Oven", btu: 65000, diversity: 10 },
-        { name: "Cooktop", btu: 40000, diversity: 10 },
-        { name: "Grill", btu: 40000, diversity: 5 },
+        { name: "Range/Oven", diversity: { default: 15, ashrae: 20, iapmo: 10 } },
+        { name: "Cooktop", diversity: { default: 10, ashrae: 15, iapmo: 8 } },
+        { name: "Double Wall Oven", diversity: { default: 15, ashrae: 20, iapmo: 10 } },
+        { name: "Commercial-Style Range", diversity: { default: 20, ashrae: 25, iapmo: 15 } },
+        { name: "Grill (Built-in)", diversity: { default: 5, ashrae: 10, iapmo: 3 } },
+        { name: "Outdoor Kitchen (Grill + Burners)", diversity: { default: 8, ashrae: 12, iapmo: 5 } },
+        { name: "Deep Fryer", diversity: { default: 10, ashrae: 15, iapmo: 8 } },
     ],
     "Clothes Dryers": [
-        { name: "Standard Dryer", btu: 35000, diversity: 15 },
-    ],
-    "Home Generators": [
-        { name: "Air-cooled (7-22kW)", btu: 295000, diversity: 100 },
-        { name: "Liquid-cooled (>22kW)", btu: 500000, diversity: 100 },
-    ],
-    "Pool & Spa Heaters": [
-        { name: "Pool Heater", btu: 400000, diversity: 100 },
-        { name: "Spa Heater", btu: 250000, diversity: 100 },
+        { name: "Standard Dryer", diversity: { default: 25, ashrae: 30, iapmo: 20 } },
+        { name: "High-Capacity Dryer", diversity: { default: 25, ashrae: 30, iapmo: 20 } },
+        { name: "Gas Dryer/Steamer Combo", diversity: { default: 25, ashrae: 30, iapmo: 20 } },
     ],
     "Fireplaces & Stoves": [
-        { name: "Gas Fireplace Insert", btu: 35000, diversity: 20 },
-        { name: "Gas Stove", btu: 30000, diversity: 20 },
+        { name: "Gas Fireplace Insert", diversity: { default: 20, ashrae: 25, iapmo: 15 } },
+        { name: "Direct-Vent Fireplace", diversity: { default: 20, ashrae: 25, iapmo: 15 } },
+        { name: "Gas Stove", diversity: { default: 20, ashrae: 25, iapmo: 15 } },
+        { name: "Gas Log Set", diversity: { default: 15, ashrae: 20, iapmo: 10 } },
+        { name: "Outdoor Fire Pit", diversity: { default: 10, ashrae: 15, iapmo: 5 } },
+        { name: "Patio Heater", diversity: { default: 50, ashrae: 60, iapmo: 40 } },
+    ],
+    "Pool & Spa Heaters": [
+        { name: "Pool Heater", diversity: { default: 100, ashrae: 100, iapmo: 100 } },
+        { name: "Spa Heater", diversity: { default: 100, ashrae: 100, iapmo: 100 } },
+        { name: "Combined Pool/Spa Heater", diversity: { default: 100, ashrae: 100, iapmo: 100 } },
+    ],
+    "Home Generators": [
+        { name: "Air-cooled (7-22kW)", diversity: { default: 100, ashrae: 100, iapmo: 100 } },
+        { name: "Liquid-cooled (>22kW)", diversity: { default: 100, ashrae: 100, iapmo: 100 } },
+    ],
+    "Other Appliances": [
+        { name: "Gas Lighting (e.g., Lanterns)", diversity: { default: 40, ashrae: 50, iapmo: 30 } },
+        { name: "Incinerator", diversity: { default: 5, ashrae: 10, iapmo: 3 } },
+        { name: "Gas Refrigerator", diversity: { default: 50, ashrae: 60, iapmo: 40 } },
     ],
     "Custom": [
-        { name: "Custom Appliance", btu: 0, diversity: 0 },
+        { name: "Custom Appliance", diversity: { default: 0, ashrae: 0, iapmo: 0 } },
     ]
 };
 
-const CATEGORY_DIVERSITY_DEFAULTS = {
-    "Heating": 85,
-    "Hot Water": 40,
-    "Cooking": 10,
-    "Clothes Dryers": 15,
-    "Home Generators": 100,
-    "Pool & Spa Heaters": 100,
-    "Fireplaces & Stoves": 20,
+const CATEGORY_DIVERSITY_DEFAULTS: { [category: string]: { [standard: string]: number } } = {
+    "Heating": { default: 75, ashrae: 90, iapmo: 70 },
+    "Hot Water": { default: 35, ashrae: 50, iapmo: 30 },
+    "Cooking": { default: 15, ashrae: 20, iapmo: 10 },
+    "Clothes Dryers": { default: 25, ashrae: 30, iapmo: 20 },
+    "Fireplaces & Stoves": { default: 20, ashrae: 25, iapmo: 15 },
+    "Pool & Spa Heaters": { default: 100, ashrae: 100, iapmo: 100 },
+    "Home Generators": { default: 100, ashrae: 100, iapmo: 100 },
+    "Other Appliances": { default: 50, ashrae: 60, iapmo: 40 },
 };
 
 // --- DOM ELEMENT SELECTORS ---
@@ -79,6 +112,7 @@ const addApplianceBtn = document.getElementById('add-appliance-btn')!;
 const calculateBtn = document.getElementById('calculate-btn')!;
 const resultsUnitsSelect = document.getElementById('results-units') as HTMLSelectElement;
 const gasEnergyContentInput = document.getElementById('gas-energy-content') as HTMLInputElement;
+const diversityStandardSelect = document.getElementById('diversity-standard') as HTMLSelectElement;
 const totalConnectedLoadEl = document.getElementById('total-connected-load')!;
 const totalDiversifiedLoadEl = document.getElementById('total-diversified-load')!;
 const saveBtn = document.getElementById('save-btn')!;
@@ -123,16 +157,16 @@ function addApplianceRow(appliance?: ApplianceState) {
     const diversitySourceOptions = Object.keys(CATEGORY_DIVERSITY_DEFAULTS).map(cat => `<option value="${cat}" ${appliance?.diversitySource === cat ? 'selected' : ''}>${cat}</option>`).join('');
 
     row.innerHTML = `
-        <select class="category-select" aria-label="Appliance Category">${categoryOptions}</select>
+        <select class="category-select" aria-label="Appliance Category"><option value="" selected disabled>Select Category...</option>${categoryOptions}</select>
         <div class="equipment-container">
             <select class="equipment-select" aria-label="Equipment Type"></select>
             <input type="text" class="custom-equipment-input" style="display: none;" placeholder="Appliance Name" aria-label="Custom Equipment Name" value="${(appliance?.category === 'Custom' ? appliance.equipment : '')}">
         </div>
-        <input type="number" class="rating-input" aria-label="Max Input Rating" value="${appliance?.rating ?? 0}" min="0">
+        <input type="number" class="rating-input" aria-label="Max Input Rating" value="${appliance?.rating ?? ''}" min="0" placeholder="e.g., 120000">
         <div class="radio-group">
-            <label><input type="radio" name="units-${rowId}" value="BTU/hr" ${appliance?.units === 'BTU/hr' || !appliance ? 'checked' : ''}> BTU/hr</label>
+            <label><input type="radio" name="units-${rowId}" value="BTU/hr" ${appliance?.units === 'BTU/hr' ? 'checked' : ''}> BTU/hr</label>
             <label><input type="radio" name="units-${rowId}" value="MMBTU/hr" ${appliance?.units === 'MMBTU/hr' ? 'checked' : ''}> MMBTU/hr</label>
-            <label><input type="radio" name="units-${rowId}" value="CFH" ${appliance?.units === 'CFH' ? 'checked' : ''}> CFH</label>
+            <label><input type="radio" name="units-${rowId}" value="CFH" ${appliance?.units === 'CFH' || !appliance ? 'checked' : ''}> CFH</label>
         </div>
         <div class="diversity-container">
             <input type="number" class="diversity-input" aria-label="Diversity Factor" value="${appliance?.diversity ?? 0}" min="0" max="100">
@@ -147,8 +181,10 @@ function addApplianceRow(appliance?: ApplianceState) {
     applianceList.appendChild(row);
 
     const categorySelect = row.querySelector('.category-select') as HTMLSelectElement;
-    updateEquipmentOptions(categorySelect, appliance?.equipment);
-    updateRowUIForCategory(row);
+    if (appliance?.category) {
+        updateEquipmentOptions(categorySelect, appliance?.equipment);
+        updateRowUIForCategory(row);
+    }
 }
 
 function updateRowUIForCategory(row: HTMLElement) {
@@ -182,28 +218,51 @@ function updateEquipmentOptions(categorySelect: HTMLSelectElement, selectedEquip
     }
 
     const equipmentList = APPLIANCE_DATA[category];
-    equipmentSelect.innerHTML = equipmentList.map(eq => `<option value="${eq.name}" ${selectedEquipment === eq.name ? 'selected' : ''}>${eq.name}</option>`).join('');
+    equipmentSelect.innerHTML = `<option value="" selected disabled>Select Equipment...</option>` + equipmentList.map(eq => `<option value="${eq.name}" ${selectedEquipment === eq.name ? 'selected' : ''}>${eq.name}</option>`).join('');
 }
 
 
-function updateInputsFromEquipment(equipmentSelect: HTMLSelectElement) {
+function updateDiversityFromEquipment(equipmentSelect: HTMLSelectElement) {
     const row = equipmentSelect.closest('.appliance-row')!;
-    const ratingInput = row.querySelector('.rating-input') as HTMLInputElement;
     const diversityInput = row.querySelector('.diversity-input') as HTMLInputElement;
     const category = (row.querySelector('.category-select') as HTMLSelectElement).value;
+    const standard = diversityStandardSelect.value;
 
     const equipmentList = APPLIANCE_DATA[category];
     if (!equipmentList) return;
 
     const selected = equipmentList.find(eq => eq.name === equipmentSelect.value);
     if (selected) {
-        ratingInput.value = selected.btu.toString();
-        diversityInput.value = selected.diversity.toString();
+        diversityInput.value = selected.diversity[standard].toString();
     }
 }
 
+function updateAllDiversityFactors() {
+    const newStandard = diversityStandardSelect.value;
+    document.querySelectorAll('.appliance-row').forEach(row => {
+        if (row.classList.contains('header')) return;
+        
+        const diversityInput = row.querySelector('.diversity-input') as HTMLInputElement;
+        const category = (row.querySelector('.category-select') as HTMLSelectElement).value;
+
+        if (category === 'Custom') {
+            const sourceCategory = (row.querySelector('.diversity-source-select') as HTMLSelectElement).value as keyof typeof CATEGORY_DIVERSITY_DEFAULTS;
+            if (sourceCategory && CATEGORY_DIVERSITY_DEFAULTS[sourceCategory]) {
+                diversityInput.value = CATEGORY_DIVERSITY_DEFAULTS[sourceCategory][newStandard].toString();
+            }
+        } else {
+            const equipmentName = (row.querySelector('.equipment-select') as HTMLSelectElement).value;
+            const equipmentData = APPLIANCE_DATA[category]?.find(eq => eq.name === equipmentName);
+            if (equipmentData) {
+                diversityInput.value = equipmentData.diversity[newStandard].toString();
+            }
+        }
+    });
+}
+
+
 function calculate() {
-    const gasEnergy = parseFloat(gasEnergyContentInput.value) || 1000;
+    const gasEnergy = parseFloat(gasEnergyContentInput.value) || 1040;
     let totalConnected = 0;
     let totalDiversified = 0;
 
@@ -225,7 +284,7 @@ function calculate() {
 
 function updateResultDisplay() {
     const displayUnit = resultsUnitsSelect.value;
-    const gasEnergy = parseFloat(gasEnergyContentInput.value) || 1000;
+    const gasEnergy = parseFloat(gasEnergyContentInput.value) || 1040;
 
     const connected = convertFromBtu(calculatedResults.connectedBtu, displayUnit, gasEnergy);
     const diversified = convertFromBtu(calculatedResults.diversifiedBtu, displayUnit, gasEnergy);
@@ -379,11 +438,14 @@ function exportToPdf() {
     }
 
     // Calculation Methodology
+    const standardKey = diversityStandardSelect.value;
+    const standardName = DIVERSITY_STANDARDS[standardKey] || 'the selected';
+
     doc.setFontSize(12);
     doc.text("Calculation Methodology & Sources", 14, y);
     y += 6;
     doc.setFontSize(10);
-    const methText = `The Diversified Load for each appliance is calculated as: Max Input Rating × (Diversity Factor / 100). The Total Diversified Load is the sum of these individual values. The default diversity factors used are representative values derived from an analysis of common North American gas utility engineering practices and are intended for estimation. Specifically, these values are consistent with methodologies found in sources such as the ASHRAE Handbook—Fundamentals. For code-compliant sizing, factors should be verified with the local utility or a qualified engineer. Gas energy content was assumed to be ${data.gasEnergyContent} BTU/SCF.`;
+    const methText = `The Diversified Load for each appliance is calculated as: Max Input Rating × (Diversity Factor / 100). The Total Diversified Load is the sum of these individual values. The default diversity factors used are representative values derived from an analysis of common North American gas utility engineering practices and are intended for estimation. Specifically, these values are consistent with methodologies found in sources such as the ASHRAE Handbook—Fundamentals. The diversity factors used in this calculation are based on the ${standardName} standard. For code-compliant sizing, factors should be verified with the local utility or a qualified engineer. Gas energy content was assumed to be ${data.gasEnergyContent} BTU/SCF.`;
     const splitMeth = doc.splitTextToSize(methText, 180);
     doc.text(splitMeth, 14, y);
     y += splitMeth.length * 4 + 10;
@@ -391,11 +453,19 @@ function exportToPdf() {
     // Final Summary
     doc.setFontSize(12);
     doc.text("Final Summary", 14, y);
-    y += 6;
-    doc.setFontSize(10);
-    const finalSummary = `The total connected load for this project is ${calculatedResults.connectedBtu.toLocaleString()} BTU/hr. Applying the specified diversity factors results in a final Total Diversified Load of ${calculatedResults.diversifiedBtu.toLocaleString()} BTU/hr, which represents the expected peak demand for the residence.`;
-    const splitFinal = doc.splitTextToSize(finalSummary, 180);
-    doc.text(splitFinal, 14, y);
+    y += 2;
+    autoTable(doc, {
+        startY: y,
+        body: [
+            [{ content: 'Total Connected Load (Without Diversity)', styles: { fontStyle: 'bold' } }, `${calculatedResults.connectedBtu.toLocaleString()} BTU/hr`],
+            [{ content: 'Total Diversified Load (With Diversity)', styles: { fontStyle: 'bold' } }, `${calculatedResults.diversifiedBtu.toLocaleString()} BTU/hr`],
+        ],
+        theme: 'grid',
+        styles: { fontSize: 10 }
+    });
+    // @ts-ignore
+    y = doc.lastAutoTable.finalY + 10;
+
 
     // Footer on all pages
     const pageCount = (doc as any).internal.getNumberOfPages();
@@ -410,9 +480,86 @@ function exportToPdf() {
     doc.save(`${data.projectInfo.projectName || 'load-report'}.pdf`);
 }
 
+function createDiversityTable() {
+    const tableContainer = document.getElementById('table-tab');
+    if (!tableContainer) return;
+
+    const mainHeading = document.createElement('h2');
+    mainHeading.textContent = 'Appliance Diversity Factor Reference Tables';
+    tableContainer.appendChild(mainHeading);
+
+    const categories = Object.keys(APPLIANCE_DATA);
+
+    for (const category of categories) {
+        if (category === 'Custom') continue;
+
+        const categoryData = APPLIANCE_DATA[category];
+        if (categoryData.length === 0) continue;
+
+        const categoryHeading = document.createElement('h3');
+        categoryHeading.textContent = category;
+        tableContainer.appendChild(categoryHeading);
+
+        const table = document.createElement('table');
+        const thead = document.createElement('thead');
+        const tbody = document.createElement('tbody');
+
+        const headerRow = document.createElement('tr');
+        const headers = ['Equipment Type', DIVERSITY_STANDARDS.default, DIVERSITY_STANDARDS.ashrae, DIVERSITY_STANDARDS.iapmo];
+        headers.forEach(headerText => {
+            const th = document.createElement('th');
+            th.textContent = headerText;
+            headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+
+        categoryData.forEach(equipment => {
+            const row = document.createElement('tr');
+            
+            const cellName = document.createElement('td');
+            cellName.textContent = equipment.name;
+            row.appendChild(cellName);
+
+            const cellDefault = document.createElement('td');
+            cellDefault.textContent = `${equipment.diversity.default}%`;
+            row.appendChild(cellDefault);
+
+            const cellAshrae = document.createElement('td');
+            cellAshrae.textContent = `${equipment.diversity.ashrae}%`;
+            row.appendChild(cellAshrae);
+            
+            const cellIapmo = document.createElement('td');
+            cellIapmo.textContent = `${equipment.diversity.iapmo}%`;
+            row.appendChild(cellIapmo);
+
+            tbody.appendChild(row);
+        });
+
+        table.appendChild(thead);
+        table.appendChild(tbody);
+        tableContainer.appendChild(table);
+    }
+}
+
 
 // --- EVENT LISTENERS ---
 function setupEventListeners() {
+    // Tab switching logic
+    const tabsContainer = document.querySelector('.tabs');
+    tabsContainer?.addEventListener('click', (e) => {
+        const target = e.target as HTMLElement;
+        if (target.classList.contains('tab-link')) {
+            const tabId = target.dataset.tab;
+            if (tabId) {
+                document.querySelectorAll('.tab-link').forEach(link => link.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                
+                target.classList.add('active');
+                document.getElementById(tabId)?.classList.add('active');
+            }
+        }
+    });
+
     addApplianceBtn.addEventListener('click', () => addApplianceRow());
     
     applianceList.addEventListener('click', (e) => {
@@ -441,19 +588,20 @@ function setupEventListeners() {
                 (row.querySelector('.diversity-source-select') as HTMLSelectElement).value = '';
             } else {
                 const equipmentSelect = row.querySelector('.equipment-select') as HTMLSelectElement;
-                updateInputsFromEquipment(equipmentSelect);
+                updateDiversityFromEquipment(equipmentSelect);
             }
         }
 
         if (target.classList.contains('equipment-select')) {
-            updateInputsFromEquipment(target as HTMLSelectElement);
+            updateDiversityFromEquipment(target as HTMLSelectElement);
         }
 
         if (target.classList.contains('diversity-source-select')) {
+            const standard = diversityStandardSelect.value;
             const sourceCategory = (target as HTMLSelectElement).value as keyof typeof CATEGORY_DIVERSITY_DEFAULTS;
             if (sourceCategory && CATEGORY_DIVERSITY_DEFAULTS[sourceCategory]) {
                 const diversityInput = row.querySelector('.diversity-input') as HTMLInputElement;
-                diversityInput.value = CATEGORY_DIVERSITY_DEFAULTS[sourceCategory].toString();
+                diversityInput.value = CATEGORY_DIVERSITY_DEFAULTS[sourceCategory][standard].toString();
             }
         }
     });
@@ -461,6 +609,7 @@ function setupEventListeners() {
     calculateBtn.addEventListener('click', calculate);
     resultsUnitsSelect.addEventListener('change', updateResultDisplay);
     gasEnergyContentInput.addEventListener('change', updateResultDisplay);
+    diversityStandardSelect.addEventListener('change', updateAllDiversityFactors);
     
     saveBtn.addEventListener('click', save);
     loadBtn.addEventListener('click', () => loadInput.click());
@@ -475,8 +624,8 @@ function init() {
     (document.getElementById('assessment-date') as HTMLInputElement).value = today;
     (document.getElementById('revision-date') as HTMLInputElement).value = today;
     
+    createDiversityTable();
     setupEventListeners();
-    addApplianceRow(); // Start with one empty row
 }
 
 init();

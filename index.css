@@ -56,6 +56,44 @@ main {
     margin: 1rem auto;
 }
 
+/* --- Tabs --- */
+.tabs {
+    display: flex;
+    border-bottom: 2px solid var(--border-color);
+    margin-bottom: 1.5rem;
+}
+
+.tab-link {
+    padding: 0.75rem 1.5rem;
+    cursor: pointer;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-size: 1.1rem;
+    color: var(--secondary-color);
+    transition: color 0.2s, border-color 0.2s;
+    font-weight: 500;
+}
+
+.tab-link:hover {
+    color: var(--primary-hover);
+}
+
+.tab-link.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+    font-weight: 600;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+
 section {
     background-color: var(--surface-color);
     border-radius: var(--border-radius);
@@ -267,6 +305,121 @@ footer {
 .diversity-container .diversity-source-select {
     padding: 0.5rem;
     max-width: 110px;
+}
+
+/* --- Theory Page Styles --- */
+#theory-content sup {
+    font-size: 0.7em;
+    vertical-align: super;
+    margin-left: 2px;
+}
+
+#theory-content h3 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    color: var(--primary-hover);
+    font-size: 1.4rem;
+}
+
+#theory-content p {
+    margin-bottom: 1rem;
+}
+
+#theory-content ul {
+    padding-left: 20px;
+}
+
+#theory-content ul li {
+    margin-bottom: 1rem;
+}
+
+#theory-content a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+#theory-content a:hover {
+    text-decoration: underline;
+    color: var(--primary-hover);
+}
+
+.formula-box {
+    background-color: #e9ecef;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    border-left: 5px solid var(--primary-color);
+    font-family: "Courier New", Courier, monospace;
+    font-weight: 600;
+    margin: 1.5rem 0;
+}
+
+.disclaimer {
+    background-color: #fff3cd;
+    color: #856404;
+    padding: 1rem;
+    border: 1px solid #ffeeba;
+    border-radius: var(--border-radius);
+}
+
+.references-list {
+    padding-left: 20px;
+    list-style-type: decimal;
+}
+.references-list li {
+    margin-bottom: 1.25rem;
+}
+
+.references-list a {
+    display: inline-block;
+    margin-top: 0.25rem;
+}
+
+/* --- Diversity Table Tab Styles --- */
+#table-tab {
+    background-color: var(--surface-color);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: var(--box-shadow);
+    border: 1px solid var(--border-color);
+}
+
+#table-tab h3 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    color: var(--primary-hover);
+    font-size: 1.4rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+}
+
+#table-tab table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 2.5rem;
+    box-shadow: var(--box-shadow);
+    border: 1px solid var(--border-color);
+}
+
+#table-tab th,
+#table-tab td {
+    border: 1px solid var(--border-color);
+    padding: 0.75rem 1rem;
+    text-align: left;
+    vertical-align: top;
+}
+
+#table-tab th {
+    background-color: #e9ecef;
+    font-weight: 600;
+}
+
+#table-tab td:first-child {
+    font-weight: 500;
+}
+
+#table-tab td:not(:first-child) {
+    text-align: center;
 }
 
 
