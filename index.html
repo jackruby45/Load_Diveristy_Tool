@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Residential Load Diversity Calculator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="index.css">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔥</text></svg>">
     <script type="importmap">
@@ -20,7 +23,7 @@
     <header>
         <h1>Residential Load Diversity Calculator</h1>
         <p>For Single-Family Residences in Maine, New Hampshire and Massachusetts</p>
-        <p class="attribution">By: Tim Bickford Rev 1.2 (08/26/2025)</p>
+        <p class="attribution">By: Tim Bickford Rev 2.0 (08/28/2025)</p>
     </header>
 
     <main>
@@ -31,64 +34,73 @@
         </div>
 
         <div id="calculator-tab" class="tab-content active">
+            <div id="quick-start-guide" class="banner">
+                <p><strong>Quick Start:</strong> 1. Fill out Project Information → 2. Add Appliances → 3. Results will update automatically!</p>
+                <button id="dismiss-guide-btn" class="dismiss-btn" aria-label="Dismiss Quick Start Guide">&times;</button>
+            </div>
             <form id="calculator-form" onsubmit="return false;">
-                <section id="project-info" aria-labelledby="project-info-heading">
-                    <h2 id="project-info-heading">Project Information</h2>
-                    <div class="grid-container">
-                        <div class="form-group">
-                            <label for="project-name">Project Name</label>
-                            <input type="text" id="project-name" name="projectName" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="doc">DOC (Distribution Operating Company)</label>
-                            <select id="doc" name="doc" required>
-                                <option value="Unitil (NU-NH)">Unitil (NU-NH)</option>
-                                <option value="Unitil (NU-ME)">Unitil (NU-ME)</option>
-                                <option value="FG&E (Fitchburg Gas & Electric)">FG&E (Fitchburg Gas & Electric)</option>
-                                <option value="Bangor Natural Gas (BNG)">Bangor Natural Gas (BNG)</option>
-                                <option value="Maine Natural Gas (MNG)">Maine Natural Gas (MNG)</option>
-                                <option value="Other">Other</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="street-address">Street Number & Name</label>
-                            <input type="text" id="street-address" name="streetAddress" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="town">Town</label>
-                            <input type="text" id="town" name="town" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="state">State</label>
-                            <select id="state" name="state" required>
-                                <option value="ME">ME</option>
-                                <option value="NH">NH</option>
-                                <option value="MA">MA</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="g-intake">G-Intake Number</label>
-                            <input type="text" id="g-intake" name="gIntake">
-                        </div>
-                        <div class="form-group">
-                            <label for="assessed-by">Assessed by</label>
-                            <input type="text" id="assessed-by" name="assessedBy" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="assessment-date">Assessment Date</label>
-                            <input type="date" id="assessment-date" name="assessmentDate" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="revision-number">Revision Number</label>
-                            <input type="number" id="revision-number" name="revisionNumber" value="0" min="0" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="revision-date">Revision Date</label>
-                            <input type="date" id="revision-date" name="revisionDate" required>
-                        </div>
-                        <div class="form-group full-width">
-                            <label for="project-description">Project Description</label>
-                            <textarea id="project-description" name="projectDescription" rows="4"></textarea>
+                <section id="project-info" class="accordion open" aria-labelledby="project-info-heading">
+                    <button type="button" class="accordion-header" aria-expanded="true" aria-controls="project-info-content">
+                        <h2 id="project-info-heading" class="accordion-title">Project Information</h2>
+                        <span class="accordion-icon" aria-hidden="true"></span>
+                    </button>
+                    <div id="project-info-content" class="accordion-content">
+                        <div class="grid-container">
+                            <div class="form-group">
+                                <label for="project-name">Project Name</label>
+                                <input type="text" id="project-name" name="projectName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="doc">DOC</label>
+                                <select id="doc" name="doc" required>
+                                    <option value="Unitil (NU-NH)">Unitil (NU-NH)</option>
+                                    <option value="Unitil (NU-ME)">Unitil (NU-ME)</option>
+                                    <option value="FG&E (Fitchburg Gas & Electric)">FG&E (Fitchburg Gas & Electric)</option>
+                                    <option value="Bangor Natural Gas (BNG)">Bangor Natural Gas (BNG)</option>
+                                    <option value="Maine Natural Gas (MNG)">Maine Natural Gas (MNG)</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="street-address">Street Number & Name</label>
+                                <input type="text" id="street-address" name="streetAddress" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="town">Town</label>
+                                <input type="text" id="town" name="town" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="state">State</label>
+                                <select id="state" name="state" required>
+                                    <option value="ME">ME</option>
+                                    <option value="NH">NH</option>
+                                    <option value="MA">MA</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="g-intake">G-Intake Number</label>
+                                <input type="text" id="g-intake" name="gIntake">
+                            </div>
+                            <div class="form-group">
+                                <label for="assessed-by">Assessed by</label>
+                                <input type="text" id="assessed-by" name="assessedBy" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="assessment-date">Assessment Date</label>
+                                <input type="date" id="assessment-date" name="assessmentDate" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="revision-number">Revision Number</label>
+                                <input type="number" id="revision-number" name="revisionNumber" value="0" min="0" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="revision-date">Revision Date</label>
+                                <input type="date" id="revision-date" name="revisionDate" required>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="project-description">Project Description</label>
+                                <textarea id="project-description" name="projectDescription" rows="4"></textarea>
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -97,13 +109,13 @@
                     <h2 id="appliance-section-heading">Appliance Input</h2>
                     <div class="appliance-controls">
                         <div class="form-group">
-                            <label for="gas-energy-content">Gas Energy Content (BTU/SCF)</label>
-                            <input type="number" id="gas-energy-content" value="1040" min="1">
+                            <label for="gas-energy-content">Gas HHV (Btu/ft³)</label>
+                            <input type="number" id="gas-energy-content" value="1036" min="1">
                         </div>
                         <div class="form-group">
                             <label for="diversity-standard">Diversity Standard</label>
                             <select id="diversity-standard" name="diversityStandard">
-                                <option value="default">Utility Standard (Default)</option>
+                                <option value="default" selected>Utility Standard (Default)</option>
                                 <option value="ashrae">ASHRAE (Conservative)</option>
                                 <option value="iapmo">IAPMO (Lenient)</option>
                             </select>
@@ -120,15 +132,53 @@
                             <div>Action</div>
                         </div>
                         <div id="appliance-list">
+                            <div id="empty-state" class="empty-state">
+                                <h3>No appliances added yet.</h3>
+                                <p>Click the "Add Appliance" button to get started!</p>
+                            </div>
                             <!-- Appliance rows will be dynamically inserted here -->
                         </div>
                     </div>
                 </section>
 
-                <section id="calculation-section" aria-labelledby="calculation-section-heading">
-                     <h2 id="calculation-section-heading">Calculate & Display Results</h2>
-                    <div class="results-controls">
-                        <button type="button" id="calculate-btn" class="button-primary">Calculate</button>
+                <section id="results-section" aria-labelledby="results-section-heading">
+                     <h2 id="results-section-heading">Results</h2>
+                    <div id="results-display" class="results-container">
+                        <div class="result-item">
+                            <span class="result-label">Total Connected Load:</span>
+                            <span id="total-connected-load" class="result-value">0</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Winter Peak (Diversified):</span>
+                            <span id="winter-peak-load" class="result-value">0</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Summer Peak (Diversified):</span>
+                            <span id="summer-peak-load" class="result-value">0</span>
+                        </div>
+                        <div class="result-item summary-item">
+                            <span class="result-label">Design Load (Worst Case):</span>
+                            <span id="total-diversified-load" class="result-value">0</span>
+                        </div>
+                    </div>
+                    <div class="details-toggle">
+                        <button type="button" id="show-details-btn" class="button-secondary">Show Calculation Details</button>
+                    </div>
+                    <div id="calculation-details" class="calculation-details-container">
+                        <!-- Calculation breakdown is injected here -->
+                    </div>
+                </section>
+
+                <section id="methodology-section" aria-labelledby="methodology-section-heading">
+                    <h2 id="methodology-section-heading">Calculation Methodology</h2>
+                    <div id="methodology-display" class="methodology-container">
+                        <!-- Dynamic content is injected here by index.tsx -->
+                    </div>
+                </section>
+
+                <section id="actions-section" aria-labelledby="actions-section-heading">
+                    <h2 id="actions-section-heading">Actions & Export</h2>
+                    <div class="action-controls">
                         <div class="form-group">
                             <label for="results-units">Display Units</label>
                             <select id="results-units">
@@ -137,24 +187,9 @@
                                 <option value="CFH" selected>CFH</option>
                             </select>
                         </div>
-                    </div>
-                    <div id="results-display" class="results-container">
-                        <div class="result-item">
-                            <span class="result-label">Total Connected Load:</span>
-                            <span id="total-connected-load" class="result-value">0</span>
-                        </div>
-                        <div class="result-item">
-                            <span class="result-label">Total Diversified Load:</span>
-                            <span id="total-diversified-load" class="result-value">0</span>
-                        </div>
-                    </div>
-                </section>
-
-                <section id="file-ops-section" aria-labelledby="file-ops-heading">
-                    <h2 id="file-ops-heading">File Operations</h2>
-                    <div class="file-buttons">
-                        <button type="button" id="save-btn" class="button-secondary">Save</button>
-                        <button type="button" id="load-btn" class="button-secondary">Load</button>
+                        <button type="button" id="calculate-btn" class="button-primary hidden">Calculate</button>
+                        <button type="button" id="save-btn" class="button-secondary">Save Project</button>
+                        <button type="button" id="load-btn" class="button-secondary">Load Project</button>
                         <input type="file" id="load-input" accept=".json" style="display: none;">
                         <button type="button" id="export-pdf-btn" class="button-primary">Export to PDF</button>
                     </div>
@@ -164,19 +199,60 @@
 
         <div id="theory-tab" class="tab-content">
             <section id="theory-content">
-                <h2>Understanding Load Diversity in Gas Systems</h2>
-                
+                <h2>Section 1: The Core Principles of Load Diversity</h2>
+            
                 <h3>What is Load Diversity?</h3>
                 <p>Load diversity is the fundamental principle that not all gas appliances in a building will be operating at their maximum capacity at the exact same time. The total peak demand of a system is almost always less than the sum of the maximum possible demands of all its individual components.<sup>1</sup></p>
                 <p>Think of it like the lights in a house: while a home may have dozens of light bulbs, it's extremely rare for every single one to be switched on simultaneously. Similarly, a furnace, water heater, and oven are unlikely to all be running at their highest setting at the same moment.</p>
                 <p>By accounting for this diversity, engineers can accurately size gas meters and piping systems. This prevents costly oversizing while ensuring the system can safely and reliably meet the building's actual peak demand.<sup>1</sup></p>
-                
-                <h3>The Diversity Factor</h3>
+            
+                <h3>The Diversity Factor Explained</h3>
                 <p>A <strong>Diversity Factor</strong> is a percentage applied to an appliance's maximum load (its BTU rating) to estimate its realistic contribution to the system's peak demand.<sup>1</sup> A factor of 100% implies the appliance is expected to run at full capacity during the system's peak, while a lower factor acknowledges it will likely be off or running at partial load.</p>
+                <p>The core of the calculation for each appliance is a simple multiplication:</p>
                 <div class="formula-box">
                     Diversified Load = Max Input Rating × (Diversity Factor / 100)
                 </div>
-
+            
+                <hr class="section-divider">
+            
+                <h2>Section 2: The Sizing Methodology</h2>
+                <p>Applying the principle of diversity involves a clear, two-step methodology: analyzing the potential peak load for each season and then designing for the absolute worst-case scenario.</p>
+            
+                <h3>Seasonal Peak Analysis: The Worst-Case Design Method</h3>
+                <p>Residential natural gas demand is not constant throughout the year; it peaks differently in winter and summer. Sizing a gas service correctly requires identifying the single worst-case demand scenario, which is determined by comparing the calculated Winter Peak load against the Summer Peak load. The larger of the two becomes the final <strong>Design Load</strong>.</p>
+                <ul class="seasonal-list">
+                    <li><strong>Winter Peak Load:</strong> In cold climates like MA, NH, and ME, this is typically the highest demand period. It includes the diversified loads of all heating equipment running concurrently with year-round appliances like water heaters and cooking ranges.</li>
+                    <li><strong>Summer Peak Load:</strong> For homes with high-demand seasonal appliances, the summer load can sometimes exceed the winter load. This calculation includes year-round appliances plus large summer-only loads like pool or spa heaters.</li>
+                </ul>
+                <p>By calculating both scenarios and designing for the higher value, the utility ensures the gas service can safely meet demand on the coldest winter day and on a summer day when the pool heater is running at full capacity.</p>
+                <div class="formula-box">Winter Peak = Σ(Diversified Winter Loads) + Σ(Diversified Year-Round Loads)</div>
+                <div class="formula-box">Summer Peak = Σ(Diversified Summer Loads) + Σ(Diversified Year-Round Loads)</div>
+                <div class="seasonal-breakdown">
+                    <div>
+                        <h4>Winter Loads</h4>
+                        <ul>
+                            <li>Heating</li>
+                            <li>Fireplaces & Stoves</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4>Summer Loads</h4>
+                        <ul>
+                            <li>Pool & Spa Heaters</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4>Year-Round Loads</h4>
+                        <ul>
+                            <li>Hot Water</li>
+                            <li>Cooking</li>
+                            <li>Clothes Dryers</li>
+                            <li>Home Generators</li>
+                            <li>Other Appliances</li>
+                        </ul>
+                    </div>
+                </div>
+                
                 <h3>Rationale for 100% Diversity Factors (Non-Diversifiable Loads)</h3>
                 <p>It may seem counterintuitive to assign a 100% diversity factor, but it is a critical practice for certain types of equipment. These are considered <strong>"non-diversifiable" loads</strong> because they must be able to operate at their full rated capacity whenever they are called upon, regardless of other appliance usage. Undersizing the gas system for these loads could lead to equipment failure when it is needed most.<sup>2</sup></p>
                 <ul>
@@ -184,46 +260,451 @@
                     <li><strong>Critical High-Demand Utilities:</strong> A driveway boiler for a snow-melt system is a prime example. Unlike a furnace that cycles, a snow-melt system is a mission-critical utility designed to run at 100% of its rated capacity for many hours continuously during a snow or ice storm. Its function is to prevent ice accumulation and maintain safe access, a task that cannot be compromised. When its sensors detect freezing temperatures and moisture, it demands its full fuel supply without interruption. Therefore, gas utility engineering standards mandate that it be treated as a non-diversifiable load to guarantee the system can perform this critical safety function when needed most.<sup>2</sup></li>
                     <li><strong>Initial High-Demand Loads:</strong> A pool or spa heater, when initially heating a large volume of cold water, will run continuously at 100% capacity for many hours or even days. The system must be able to support this prolonged peak demand.<sup>2</sup></li>
                 </ul>
-
-                <h3>Understanding the Standards</h3>
-                <p>Diversity factors are not arbitrary. They are derived from engineering studies, historical utility data, and established codes. This calculator includes factors from several recognized sources:</p>
+            
+                <h3>A Practical Example</h3>
+                <p>Let's tie these concepts together. Consider a simple home with three appliances, using the "Utility Standard (Default)" factors:</p>
+                <ul class="example-list">
+                    <li>Forced Air Furnace: 100,000 BTU/hr (75% Diversity)</li>
+                    <li>Tank Water Heater: 40,000 BTU/hr (35% Diversity)</li>
+                    <li>Gas Range/Oven: 65,000 BTU/hr (15% Diversity)</li>
+                </ul>
+                <p><strong>First, we find the Total Connected Load, which is the sum of the maximum ratings:</strong></p>
+                <p>100,000 + 40,000 + 65,000 = <strong>205,000 BTU/hr</strong></p>
+                <p><strong>Next, we apply the diversity factors to find the Total Diversified Load:</strong></p>
+                <ul class="calculation-steps">
+                    <li>Furnace: 100,000 BTU/hr × 0.75 = 75,000 BTU/hr</li>
+                    <li>Water Heater: 40,000 BTU/hr × 0.35 = 14,000 BTU/hr</li>
+                    <li>Range: 65,000 BTU/hr × 0.15 = 9,750 BTU/hr</li>
+                    <li><strong>Total:</strong> 75,000 + 14,000 + 9,750 = <strong>98,750 BTU/hr</strong></li>
+                </ul>
+                <p>The expected peak load (98,750 BTU/hr) is less than half the total possible load (205,000 BTU/hr). The gas service would be sized based on this more realistic diversified load.</p>
+            
+                <hr class="section-divider">
+            
+                <h2>Section 3: The Three Sizing Standards</h2>
+            
+                <h3>An Overview of the Standards</h3>
+                <p>Diversity factors are not arbitrary. They are derived from engineering studies, historical utility data, and established codes. This calculator includes factors from three recognized sources, each with a different philosophy:</p>
                 <ul>
                     <li><strong>Utility Standard (Default):</strong> A balanced set of factors based on common practices from North American gas utilities. This provides a good general-purpose estimate for typical residential projects and often represents a middle ground.<sup>2</sup></li>
                     <li><strong>ASHRAE (Conservative):</strong> Factors derived from the American Society of Heating, Refrigerating and Air-Conditioning Engineers (ASHRAE) handbooks, particularly the <em>ASHRAE Handbook—Fundamentals</em>. These values are often higher (more conservative), leading to a larger calculated diversified load. This approach provides a greater margin of safety.<sup>1</sup></li>
                     <li><strong>IAPMO (Lenient):</strong> Factors related to the International Association of Plumbing and Mechanical Officials (IAPMO), often found in plumbing and gas codes like the Uniform Mechanical Code (UMC). These values can be lower (more lenient), resulting in a smaller calculated load.<sup>3</sup></li>
                 </ul>
-                
-                <h3>A Practical Example</h3>
-                <p>Consider a simple home with three appliances:</p>
-                <ul class="example-list">
-                    <li>Forced Air Furnace: 100,000 BTU/hr (85% Diversity)</li>
-                    <li>Tank Water Heater: 40,000 BTU/hr (40% Diversity)</li>
-                    <li>Gas Range/Oven: 65,000 BTU/hr (10% Diversity)</li>
-                </ul>
-                <p><strong>Total Connected Load:</strong> 100,000 + 40,000 + 65,000 = <strong>205,000 BTU/hr</strong></p>
-                <p><strong>Total Diversified Load Calculation:</strong></p>
-                <ul class="calculation-steps">
-                    <li>Furnace: 100,000 BTU/hr × 0.85 = 85,000 BTU/hr</li>
-                    <li>Water Heater: 40,000 BTU/hr × 0.40 = 16,000 BTU/hr</li>
-                    <li>Range: 65,000 BTU/hr × 0.10 = 6,500 BTU/hr</li>
-                    <li><strong>Total:</strong> 85,000 + 16,000 + 6,500 = <strong>107,500 BTU/hr</strong></li>
-                </ul>
-                <p>As you can see, the expected peak load (107,500 BTU/hr) is significantly less than the total possible load (205,000 BTU/hr). The gas service would be sized based on the diversified load.</p>
+                <p>The following sections provide a detailed analysis of each standard, including its origins, intended use case, and supporting documentation.</p>
 
+                <div class="theory-subsection">
+                    <h3>The "Utility Standard" Method Explained</h3>
+                    <h4>Short Answer</h4>
+                    <p>The Utility Standard method is a utility‑side diversity approach for premise‑level gas load sizing. You list each residential gas appliance, apply a realistic demand (coincidence) factor to its nameplate input (BTU/h), sum the diversified loads, check winter vs summer peak, convert to CFH, and size the service line, meter, and service regulator to that diversified peak (not the 100% connected load). It is not used to size interior building piping governed by NFPA 54/IFGC.</p>
+
+                    <h4>What It Is (A Precise Definition)</h4>
+                    <ul>
+                        <li>A diversity‑based sizing method for utility assets (service pipe, meter, service regulator) at a single residence.</li>
+                        <li>Uses per‑appliance demand factors (e.g., 75% for a typical furnace, 35% for a 40‑gal tank water heater, 15% for a range) that reflect the probability of simultaneous operation during the premise’s peak hour.</li>
+                        <li>Computes diversified winter and diversified summer totals and designs to the larger of the two.</li>
+                        <li>Keeps generators, pool/spa heaters, MAUs, and snow‑melt systems at 100% (no diversity) because they draw near nameplate capacity when they run.</li>
+                        <li>The “Utility Standard (Default)” column is a balanced, middle‑of‑the‑road set of factors—stricter than lenient/IAPMO‑style assumptions and looser than conservative/ASHRAE‑style simultaneity—intended for typical New England residential service/meter work.</li>
+                    </ul>
+                    <blockquote>
+                        <p>In utility language, these multipliers are demand factors (also called coincidence factors): “a number, ≤1.0, multiplied by connected load to calculate gas demand; it represents the maximum fraction of the total connected load expected to burn at any time.”</p>
+                        <footer>— <cite>Con Edison</cite></footer>
+                    </blockquote>
+
+                    <h4>Where It Comes From (Provenance and Precedent)</h4>
+                    <ol>
+                        <li>
+                            <h5>Established Utility Practice (Published Specifications)</h5>
+                            <p>Many North American gas utilities explicitly use demand/diversification factors for service sizing and meter/regulator selection. For example, <strong>Con Edison (NYC)</strong> — Service Sizing specification G‑8200 defines demand factor (“also known as coincidence factor”) and directs designers to apply it. Similarly, <strong>CPS Energy (San Antonio)</strong> — Gas Service Standards state that “a diversification factor may be applied.” These are clear, modern examples of utility‑side diversity being part of the official design workflow for service and meter sizing.</p>
+                        </li>
+                        <li>
+                            <h5>Codified Recognition of Diversity (State Code Amendment Example)</h5>
+                            <p>While interior gas piping is generally sized to maximum connected demand, some jurisdictions explicitly codify diversity for certain appliances. In Massachusetts, <strong>248 CMR adds §5.4.2.3 Diversity Factor for Domestic Ranges</strong> with a demand table for multi‑family buildings (e.g., 2 ranges → 85%, 4 → 60%, … 24+ → 27%). This is a concrete, state‑level acknowledgment of diversity in gas load calculations.</p>
+                        </li>
+                        <li>
+                            <h5>Broader Engineering Lineage (Coincidence/Diversity Concepts)</h5>
+                            <p>The underlying mathematics—coincidence, diversity, and demand factors—are standard in load engineering. Authoritative energy‑engineering references like those from <strong>The Department of Energy (Energy.gov)</strong> define these terms. Utilities have long adapted these concepts from power/thermal systems to natural gas service sizing.</p>
+                        </li>
+                    </ol>
+
+                    <h4>How It Differs from Building-Code Pipe Sizing (An Important Boundary)</h4>
+                    <ul>
+                        <li><strong>NFPA 54/IFGC for Interior Piping:</strong> Interior gas piping is normally sized to serve maximum demand at each outlet using the code’s tables or equations. Many code commentaries state the basis as total connected hourly load (all appliances at full rating). That’s an AHJ issue inside the building, separate from the utility’s service/meter design.</li>
+                        <li><strong>Utility Standard Method:</strong> This is a utility engineering practice for the assets up to and including the meter and service regulator—not a substitute for interior piping calculations.</li>
+    
+                    </ul>
+
+                    <h4>Why It's Called "Utility Standard (Default)"</h4>
+                    <p>It is a curated, middle‑band set of demand factors designed to reflect what many utilities actually assume operationally for residential services—rather than a single national code table. Published utility specs (e.g., Con Edison G‑8200, CPS Energy Standards) demonstrate the method, and other utilities use similar judgment internally. The compiled “Utility Standard” column is therefore a defensible baseline calibrated to typical New England usage and practice, intended to avoid over‑building while preserving a safety margin.</p>
+
+                    <h4>The One-Sentence Explanation</h4>
+                    <div class="formula-box">
+                        “Utility Standard is our default diversity‑based method for service/meter/regulator sizing: multiply each residential appliance’s nameplate by a realistic demand factor, sum winter and summer peaks, design to the larger, and keep code‑required interior piping sizing separate.”
+                    </div>
+                </div>
+
+                <div class="theory-subsection" id="ashrae-theory">
+                    <h3>ASHRAE Residential Diversity Factors — What they are and where they come from</h3>
+                    <p>
+                        <strong>Use case:</strong> Utility‑side premise design (service line, service regulator, and meter sizing) for homes in MA, NH, and ME using the ASHRAE (Conservative) column of factors from your residential table.<br>
+                        <strong>Edition:</strong> August 28, 2025
+                    </p>
+                
+                    <h4>1) Plain‑English summary</h4>
+                    <p>The ASHRAE (Conservative) method applies a higher simultaneity (i.e., higher percentage operating at the same time) to each residential gas appliance than our “Utility Standard” column. Multiply each appliance’s nameplate input by the ASHRAE column factor (e.g., 90% for a furnace &lt;225 kBtuh, 50% for a 40‑gal DHW tank, 20% for a range), sum diversified loads, check winter vs. summer, convert to CFH, and size the service, meter, and service regulator to the larger peak. This is a utility‑side engineering tool—not a substitute for interior piping sizing under NFPA 54 as adopted in MA/NH/ME. 
+                        <a href="https://terminology.ashrae.org" target="_blank" rel="noopener noreferrer">terminology.ashrae.org</a>, 
+                        <a href="https://www.mass.gov/" target="_blank" rel="noopener noreferrer">Mass.gov</a>, 
+                        <a href="https://www.dhhs.nh.gov/" target="_blank" rel="noopener noreferrer">NH DHHS</a>, 
+                        <a href="https://www.maine.gov/" target="_blank" rel="noopener noreferrer">Maine</a>
+                    </p>
+                
+                    <h4>2) What “ASHRAE (Conservative)” means here</h4>
+                    <p><strong>Conceptual basis.</strong> ASHRAE formalizes the ideas of diversity, coincident demand, and coincidence across HVAC and building systems. In ASHRAE’s terminology, diversity factor and coincident demand quantify how much of the connected capacity is likely to operate at the same time as the peak of interest. 
+                        <a href="https://terminology.ashrae.org" target="_blank" rel="noopener noreferrer">terminology.ashrae.org</a>
+                    </p>
+                    <p><strong>Why conservative?</strong> ASHRAE’s load methods aim to capture true peak (coincident) conditions. Adopting this column pushes simultaneity upward, increasing the diversified load (and thus meter/regulator sizing margin). ASHRAE guidance and tools (e.g., the Weather Data Viewer) explicitly analyze mean coincident variables—another reflection of peak‑coincidence philosophy. 
+                        <a href="https://www.ashrae.org/" target="_blank" rel="noopener noreferrer">ASHRAE</a>, 
+                        <a href="https://unmethours.com/" target="_blank" rel="noopener noreferrer">unmethours.com</a>
+                    </p>
+                    <p><strong>Not a single national table from ASHRAE.</strong> ASHRAE does not publish a universal list of residential gas‑appliance simultaneity percentages. Instead, ASHRAE provides the framework (definitions, coincident‑demand approach, end‑use chapters like Service Water Heating with probabilistic/fixture‑based peaking), leaving the percent mapping to the engineer/operator. The “ASHRAE (Conservative)” column in your table is therefore an operator‑standardized mapping aligned with ASHRAE’s coincident‑peak philosophy. 
+                        <a href="https://www.ashrae.org/" target="_blank" rel="noopener noreferrer">ASHRAE</a>, 
+                        <a href="https://www.energy.gov/" target="_blank" rel="noopener noreferrer">The Department of Energy's Energy.gov</a>
+                    </p>
+                    <p><strong>Example of ASHRAE’s diversity in practice (not gas‑specific):</strong> An official ASHRAE interpretation for Standard 62 notes that HVAC design procedures incorporate a diversity factor for people and for supply air—showing the organization’s long‑standing use of diversity/coincidence in sizing methodology. 
+                        <a href="https://www.ashrae.org/" target="_blank" rel="noopener noreferrer">ASHRAE</a>
+                    </p>
+                
+                    <h4>3) Regulatory boundary in MA, NH, and ME (why this is utility‑side only)</h4>
+                    <p>Interior piping is governed by NFPA 54 (National Fuel Gas Code) as adopted/amended locally; code‑table methods generally size piping to meet maximum demand at each outlet. That work is separate from the utility’s service/meter design that uses diversity.</p>
+                    <ul>
+                        <li>MA: 248 CMR 5.00 adopts/amends NFPA 54. <a href="https://www.mass.gov/" target="_blank" rel="noopener noreferrer">Mass.gov</a></li>
+                        <li>NH: State Fire Marshal list confirms 2021 NFPA 54 adoption (as amended by Saf‑FMO 300). <a href="https://www.dhhs.nh.gov/" target="_blank" rel="noopener noreferrer">NH DHHS</a></li>
+                        <li>ME: State Fire Marshal lists NFPA 54 (2021) among adopted standards; Fuel Board rules further reference adoptions. <a href="https://www.maine.gov/" target="_blank" rel="noopener noreferrer">Maine</a></li>
+                    </ul>
+                    <p><strong>Bottom line:</strong> Use the ASHRAE column for utility‑owned assets up to and including the meter and service regulator. Leave interior piping to NFPA 54 methods and the AHJ. <a href="https://www.mass.gov/" target="_blank" rel="noopener noreferrer">Mass.gov</a></p>
+                
+                    <h4>4) The ASHRAE (Conservative) reference table (residential)</h4>
+                    <p>These are the same categories as your master table; values below reproduce the ASHRAE (Conservative) column for easy one‑document use.</p>
+                    <div class="factor-reference-list">
+                        <h5>4.1 Heating</h5>
+                        <p>Forced Air Furnace &lt;225 kBtuh <strong>90%</strong> <span class="middot">&middot;</span> ≥225 kBtuh <strong>85%</strong> <span class="middot">&middot;</span> Hydronic Boiler &lt;300 kBtuh <strong>90%</strong> <span class="middot">&middot;</span> ≥300 kBtuh <strong>85%</strong> <span class="middot">&middot;</span> Combi <strong>85%</strong> <span class="middot">&middot;</span> Unit Heater <strong>80%</strong> <span class="middot">&middot;</span> Direct‑Vent Wall Furnace <strong>85%</strong> <span class="middot">&middot;</span> Radiant Tube <strong>95%</strong> <span class="middot">&middot;</span> RTU <strong>95%</strong> <span class="middot">&middot;</span> MUA <strong>100%</strong> <span class="middot">&middot;</span> Driveway/Snowmelt Boiler <strong>100%</strong></p>
+                        <h5>4.2 Hot Water</h5>
+                        <p>Tank &lt;50 gal <strong>50%</strong> <span class="middot">&middot;</span> 50–100 gal <strong>45%</strong> <span class="middot">&middot;</span> &gt;100 gal <strong>40%</strong> <span class="middot">&middot;</span> Power‑Vent <strong>50%</strong> <span class="middot">&middot;</span> On‑Demand <strong>30%</strong> <span class="middot">&middot;</span> Indirect (boiler) <strong>30%</strong> <span class="middot">&middot;</span> Booster <strong>25%</strong></p>
+                        <h5>4.3 Cooking</h5>
+                        <p>Range/Oven <strong>20%</strong> <span class="middot">&middot;</span> Cooktop <strong>15%</strong> <span class="middot">&middot;</span> Double Wall Oven <strong>20%</strong> <span class="middot">&middot;</span> Commercial‑Style Range <strong>25%</strong> <span class="middot">&middot;</span> Grill (Built‑in) <strong>10%</strong> <span class="middot">&middot;</span> Outdoor Kitchen <strong>12%</strong> <span class="middot">&middot;</span> Deep Fryer <strong>15%</strong></p>
+                        <h5>4.4 Clothes Dryers</h5>
+                        <p>Standard <strong>30%</strong> <span class="middot">&middot;</span> High‑Capacity <strong>30%</strong> <span class="middot">&middot;</span> Dryer/Steamer <strong>30%</strong></p>
+                        <h5>4.5 Fireplaces & Stoves</h5>
+                        <p>Insert <strong>25%</strong> <span class="middot">&middot;</span> Direct‑Vent Fireplace <strong>25%</strong> <span class="middot">&middot;</span> Gas Stove <strong>25%</strong> <span class="middot">&middot;</span> Gas Log Set <strong>20%</strong> <span class="middot">&middot;</span> Outdoor Fire Pit <strong>15%</strong> <span class="middot">&middot;</span> Patio Heater <strong>60%</strong></p>
+                        <h5>4.6 Pool & Spa Heaters</h5>
+                        <p>Pool <strong>100%</strong> <span class="middot">&middot;</span> Spa <strong>100%</strong> <span class="middot">&middot;</span> Combined <strong>100%</strong></p>
+                        <h5>4.7 Home Generators</h5>
+                        <p>Air‑cooled 7–22 kW <strong>100%</strong> <span class="middot">&middot;</span> Liquid‑cooled &gt;22 kW <strong>100%</strong></p>
+                        <h5>4.8 Other</h5>
+                        <p>Gas Lighting <strong>50%</strong> <span class="middot">&middot;</span> Incinerator <strong>10%</strong> <span class="middot">&middot;</span> Gas Refrigerator <strong>60%</strong></p>
+                    </div>
+                    <p>Generators stay at 100%. Manufacturer fuel curves show ~327 scfh natural gas at full load for a current 22 kW air‑cooled unit (model‑specific; always use the actual cut sheet). <a href="https://www.generac.com/" target="_blank" rel="noopener noreferrer">Generac Power Systems</a></p>
+                
+                    <h4>5) How to apply (operator procedure)</h4>
+                    <ol>
+                        <li>Inventory all appliances with nameplate BTU/h.</li>
+                        <li>Pick one column for the job—here, ASHRAE (Conservative) for all appliances.</li>
+                        <li>Multiply nameplate × factor to get per‑appliance diversified BTU/h.</li>
+                        <li>Compute Winter Peak (heating + DHW + cooking + dryer + fireplaces + generator) and Summer Peak (pool/spa + DHW + cooking + outdoor + generator).</li>
+                        <li>Design to the larger of Winter vs. Summer diversified totals.</li>
+                        <li>CFH conversion: CFH ≈ BTU/h ÷ HHV (use system HHV; if unknown, the U.S. average is about 1,036 Btu/ft³). <a href="https://www.eia.gov/" target="_blank" rel="noopener noreferrer">U.S. Energy Information Administration</a></li>
+                        <li>Meter selection: Select a meter whose rated CFH at ½″ w.c. ΔP ≥ diversified CFH (e.g., AC‑250 = 250 CFH, AL‑425 = 425 CFH, AL‑800 = 800 CFH—verify cut sheets). <a href="https://imacsystems.com/" target="_blank" rel="noopener noreferrer">imacsystems.com</a>, Process Solutions</li>
+                        <li>Regulator selection: Verify capacity at actual inlet/outlet setpoints (e.g., B42 residential; larger B31/B531 or Sensus 243 as loads increase). Use the published capacity tables for your trim. <a href="https://www.dresserutility.com/" target="_blank" rel="noopener noreferrer">dresserutility.com</a>, <a href="https://www.istec-corp.com/" target="_blank" rel="noopener noreferrer">istec-corp.com</a>, <a href="http://www.marshallwnelson.com/" target="_blank" rel="noopener noreferrer">marshallwnelson.com</a></li>
+                        <li>Interior piping check: Remind the customer/installer that interior piping remains under NFPA 54 methods (code tables/equations), not this diversity table. <a href="https://www.mass.gov/" target="_blank" rel="noopener noreferrer">Mass.gov</a></li>
+                        <li>Document HHV, chosen column, seasonal worst case, meter/regulator models, and assumptions.</li>
+                    </ol>
+                
+                    <h4>6) Why ASHRAE supports a conservative column (engineering rationale)</h4>
+                    <ul>
+                        <li><strong>Coincident‐peak orientation.</strong> ASHRAE’s vocabulary and tools emphasize coincident conditions (e.g., “mean coincident” weather variables) and coincident demand, which explicitly target peak simultaneity—appropriate when you want sizing margin. <a href="https://www.ashrae.org/" target="_blank" rel="noopener noreferrer">ASHRAE</a>, <a href="https://terminology.ashrae.org" target="_blank" rel="noopener noreferrer">terminology.ashrae.org</a></li>
+                        <li><strong>End‑use peaking (DHW).</strong> ASHRAE’s Service Water Heating chapter (Applications Handbook) treats probable peak hour and simultaneous draws, a foundation for higher simultaneity in residential DHW compared with the lenient approach. (DOE/PNNL and Federal Register references cite this ASHRAE chapter explicitly.) <a href="https://www.energy.gov/" target="_blank" rel="noopener noreferrer">The Department of Energy's Energy.gov</a>, <a href="https://www.federalregister.gov/" target="_blank" rel="noopener noreferrer">Federal Register</a></li>
+                        <li><strong>Diversity widely used in ASHRAE design.</strong> Even outside gas loads, ASHRAE documents routinely apply diversity factors (e.g., ventilation, occupancy), reinforcing the methodology’s conservatism for peak sizing. <a href="https://www.ashrae.org/" target="_blank" rel="noopener noreferrer">ASHRAE</a></li>
+                    </ul>
+                
+                    <h4>7) Worked examples (using ASHRAE (Conservative) factors)</h4>
+                    <p>Assumptions: HHV = 1,036 Btu/ft³; meter ratings at ½″ w.c. ΔP. <a href="https://www.eia.gov/" target="_blank" rel="noopener noreferrer">U.S. Energy Information Administration</a>, <a href="https://imacsystems.com/" target="_blank" rel="noopener noreferrer">imacsystems.com</a></p>
+                    <div class="worked-example">
+                        <h5>Example A — Typical single‑family home (winter‑peaking)</h5>
+                        <p><strong>Appliances:</strong> Furnace 100 kBtuh; DHW tank &lt;50 gal 40 kBtuh; Range 65 kBtuh; Dryer 22 kBtuh; Direct‑vent fireplace 30 kBtuh.</p>
+                        <p><strong>Factors:</strong> 90%, 50%, 20%, 30%, 25%.</p>
+                        <ul class="calculation-steps">
+                            <li>Furnace: 100,000 × 0.90 = 90,000 Btu/h</li>
+                            <li>DHW: 40,000 × 0.50 = 20,000</li>
+                            <li>Range: 65,000 × 0.20 = 13,000</li>
+                            <li>Dryer: 22,000 × 0.30 = 6,600</li>
+                            <li>Fireplace: 30,000 × 0.25 = 7,500</li>
+                        </ul>
+                        <p><strong>Winter diversified total = 137,100 Btu/h ⇒ 137,100 / 1,036 = 132.4 CFH.</strong></p>
+                        <p><strong>Implication:</strong> AC‑250 (250 CFH) is adequate with margin. <a href="https://imacsystems.com/" target="_blank" rel="noopener noreferrer">imacsystems.com</a></p>
+                    </div>
+                    <div class="worked-example">
+                        <h5>Example B — Large home with combi boiler + standby generator (winter‑peaking)</h5>
+                        <p><strong>Appliances:</strong> Combi 199 kBtuh; Range 65 kBtuh; Dryer 22 kBtuh; DV fireplace 30 kBtuh; 22 kW generator (use 327 scfh NG full‑load per current Generac 7043 spec). <a href="https://www.generac.com/" target="_blank" rel="noopener noreferrer">Generac Power Systems</a></p>
+                        <p><strong>Factors:</strong> 85%, 20%, 30%, 25%, 100% for generator.</p>
+                        <ul class="calculation-steps">
+                            <li>Combi: 199,000 × 0.85 = 169,150 Btu/h</li>
+                            <li>Range: 65,000 × 0.20 = 13,000</li>
+                            <li>Dryer: 22,000 × 0.30 = 6,600</li>
+                            <li>Fireplace: 30,000 × 0.25 = 7,500</li>
+                            <li>Generator: 327 scfh × 1,036 = 338,772 Btu/h</li>
+                        </ul>
+                        <p><strong>Winter diversified total = 535,022 Btu/h ⇒ 535,022 / 1,036 = 516.5 CFH.</strong></p>
+                        <p><strong>Implication:</strong> AL‑425 (425 CFH) is undersized; select AL‑800 and a higher‑capacity service regulator (e.g., B31/B531 or Sensus 243) sized from published capacity tables at the actual inlet/outlet setpoints. Process Solutions, <a href="https://www.istec-corp.com/" target="_blank" rel="noopener noreferrer">istec-corp.com</a>, <a href="http://www.marshallwnelson.com/" target="_blank" rel="noopener noreferrer">marshallwnelson.com</a></p>
+                    </div>
+                    <div class="worked-example">
+                        <h5>Example C — Summer‑peaking home with pool heater</h5>
+                        <p><strong>Appliances:</strong> Pool heater 400 kBtuh; DHW tank &lt;50 gal 40 kBtuh; Range 65 kBtuh; Outdoor kitchen 90 kBtuh.</p>
+                        <p><strong>Factors:</strong> 100%, 50%, 20%, 12%.</p>
+                        <ul class="calculation-steps">
+                            <li>Pool: 400,000 × 1.00 = 400,000 Btu/h</li>
+                            <li>DHW: 40,000 × 0.50 = 20,000</li>
+                            <li>Range: 65,000 × 0.20 = 13,000</li>
+                            <li>Outdoor kitchen: 90,000 × 0.12 = 10,800</li>
+                        </ul>
+                        <p><strong>Summer diversified total = 443,800 Btu/h ⇒ 443,800 / 1,036 = 428.3 CFH.</strong></p>
+                        <p><strong>Implication:</strong> Borderline for AL‑425; consider AL‑800 for margin and regulator headroom. <a href="https://imacsystems.com/" target="_blank" rel="noopener noreferrer">imacsystems.com</a>, Process Solutions</p>
+                    </div>
+                
+                    <h4>8) When to choose the ASHRAE (Conservative) column</h4>
+                    <p>Use this column when any of the following apply:</p>
+                    <ul>
+                        <li>Long services or small diameters where pressure drop limits are tight (e.g., long ¾″ PE runs).</li>
+                        <li>High concurrency is likely (multi‑zone heating calling together; large households; holiday cooking during design‑day heating).</li>
+                        <li>Uncertain/incomplete appliance inventory or critical loads where undersizing risk must be minimized.</li>
+                        <li>Complex end‑uses where probable peak hour and simultaneous draws (e.g., DHW) can be significant, in line with ASHRAE’s service water heating treatment. <a href="https://www.energy.gov/" target="_blank" rel="noopener noreferrer">The Department of Energy's Energy.gov</a></li>
+                    </ul>
+                
+                    <h4>9) Quality‑assurance checklist (ASHRAE column)</h4>
+                    <ul class="checklist">
+                        <li>Complete appliance inventory with nameplates (MBH).</li>
+                        <li>ASHRAE (Conservative) column chosen and documented (reason).</li>
+                        <li>Winter vs. Summer diversified totals computed; larger governs.</li>
+                        <li>HHV source documented (use utility bulletin; if absent, cite EIA ~1,036 Btu/ft³). <a href="https://www.eia.gov/" target="_blank" rel="noopener noreferrer">U.S. Energy Information Administration</a></li>
+                        <li>Meter capacity meets diversified CFH (AC‑250/AL‑425/AL‑800 cut sheet verified). <a href="https://imacsystems.com/" target="_blank" rel="noopener noreferrer">imacsystems.com</a>, Process Solutions</li>
+                        <li>Regulator capacity verified from tables at actual inlet/outlet (B42; B31/B531; Sensus 243). <a href="https://www.dresserutility.com/" target="_blank" rel="noopener noreferrer">dresserutility.com</a>, <a href="https://www.istec-corp.com/" target="_blank" rel="noopener noreferrer">istec-corp.com</a>, <a href="http://www.marshallwnelson.com/" target="_blank" rel="noopener noreferrer">marshallwnelson.com</a></li>
+                        <li>Interior piping left to NFPA 54/248 CMR/Saf‑FMO/ME Fuel Board compliance. <a href="https://www.mass.gov/" target="_blank" rel="noopener noreferrer">Mass.gov</a>, <a href="https://www.dhhs.nh.gov/" target="_blank" rel="noopener noreferrer">NH DHHS</a>, <a href="https://www.maine.gov/" target="_blank" rel="noopener noreferrer">Maine</a></li>
+                        <li>Generator treated at 100% NG scfh per manufacturer, with required inlet pressure available at all coincident loads. <a href="https://www.generac.com/" target="_blank" rel="noopener noreferrer">Generac Power Systems</a></li>
+                    </ul>
+                
+                    <h4>10) Provenance & supporting references (selected)</h4>
+                    <ul>
+                        <li><strong>Terminology & coincidence:</strong> ASHRAE Terminology entries for diversity factor and coincident demand establish the foundational concepts used here. <a href="https://terminology.ashrae.org" target="_blank" rel="noopener noreferrer">terminology.ashrae.org</a></li>
+                        <li><strong>ASHRAE uses diversity in design:</strong> Official interpretation to Standard 62 notes use of diversity factor in HVAC design procedures. <a href="https://www.ashrae.org/" target="_blank" rel="noopener noreferrer">ASHRAE</a></li>
+                        <li><strong>Coincident/mean‑coincident analysis:</strong> ASHRAE Weather Data Viewer supports coincident variables, aligning with peak‑oriented sizing practices. <a href="https://www.ashrae.org/" target="_blank" rel="noopener noreferrer">ASHRAE</a></li>
+                        <li><strong>Service Water Heating methodology:</strong> ASHRAE Handbook—HVAC Applications Chapter 51 (2019/2023 editions) addresses hot‑water load and sizing, including simultaneous use; cited by DOE/PNNL and Federal Register. <a href="https://www.energy.gov/" target="_blank" rel="noopener noreferrer">The Department of Energy's Energy.gov</a>, <a href="https://www.ashrae.org/" target="_blank" rel="noopener noreferrer">ASHRAE</a>, <a href="https://www.federalregister.gov/" target="_blank" rel="noopener noreferrer">Federal Register</a></li>
+                        <li><strong>State adoptions of NFPA 54:</strong> MA 248 CMR 5.00; NH adopted codes list; ME State Fire Marshal & Fuel Board rules. <a href="https://www.mass.gov/" target="_blank" rel="noopener noreferrer">Mass.gov</a>, <a href="https://www.dhhs.nh.gov/" target="_blank" rel="noopener noreferrer">NH DHHS</a>, <a href="https://www.maine.gov/" target="_blank" rel="noopener noreferrer">Maine</a></li>
+                        <li><strong>HHV for CFH↔BTU conversion:</strong> U.S. EIA heat content of delivered natural gas. <a href="https://www.eia.gov/" target="_blank" rel="noopener noreferrer">U.S. Energy Information Administration</a></li>
+                        <li><strong>Meters:</strong> AC‑250 (250 CFH at ½″ ΔP), AL‑425 (425 CFH), AL‑800 (800 CFH) manufacturer literature. <a href="https://imacsystems.com/" target="_blank" rel="noopener noreferrer">imacsystems.com</a>, Process Solutions</li>
+                        <li><strong>Regulators:</strong> Itron B42 residential and B31/B531 commercial; Sensus 243 large‑capacity service regulators—capacity tables and performance notes. <a href="https://www.dresserutility.com/" target="_blank" rel="noopener noreferrer">dresserutility.com</a>, <a href="https://www.istec-corp.com/" target="_blank" rel="noopener noreferrer">istec-corp.com</a>, <a href="http://www.marshallwnelson.com/" target="_blank" rel="noopener noreferrer">marshallwnelson.com</a></li>
+                        <li><strong>Generators (example):</strong> Generac Guardian 20/22/24 kW spec sheet showing NG consumption (e.g., 327 scfh at 100% for 22 kW). <a href="https://www.generac.com/" target="_blank" rel="noopener noreferrer">Generac Power Systems</a></li>
+                    </ul>
+                
+                    <h4>11) One‑page SOP language you can drop into your standard</h4>
+                    <div class="formula-box">
+                        <h5>ASHRAE Residential Diversity Method (Utility‑Side)</h5>
+                        <p><strong>Purpose:</strong> Provide a conservative, ASHRAE‑aligned simultaneity approach for service, meter, and service regulator sizing at residential premises.</p>
+                        <p><strong>Procedure:</strong> Inventory appliances → apply ASHRAE (Conservative) factors → compute Winter and Summer diversified sums → design to the larger → convert to CFH using system HHV → select meter/regulator from cut sheets → record assumptions and references. Notes: Treat generators at 100% of manufacturer NG scfh and maintain specified inlet pressure under coincident loads. Interior piping remains under NFPA 54 methods.</p>
+                    </div>
+                
+                    <h4>Final note</h4>
+                    <p>This document does not claim that ASHRAE publishes these exact percentages. Rather, it frames a conservative, operator‑standardized set of appliance demand factors that is consistent with ASHRAE’s coincident‑peak philosophy and with the way ASHRAE treats end‑use peaking (e.g., service water heating). Where jurisdictional or planning needs warrant additional margin, prefer this column over the Utility Standard or IAPMO‑style lenient assumptions.</p>
+                </div>
+
+                <div class="theory-subsection" id="iapmo-theory">
+                    <h3>IAPMO Residential Diversity Factors — What they are and where they come from</h3>
+                    <p>
+                        <strong>Use case:</strong> Utility‑side premise design (service line, service regulator, and meter sizing) for homes in <strong>MA, NH, and ME</strong> using the <strong>IAPMO (Lenient)</strong> column of factors from your residential table.<br>
+                        <strong>Edition:</strong> August 28, 2025
+                    </p>
+                    <hr>
+                    <h4>1) Plain‑English summary</h4>
+                    <p>The <strong>IAPMO (Lenient)</strong> method applies <strong>lower simultaneity</strong> (smaller percentages operating at the same time) to each residential gas appliance than the Utility Standard or ASHRAE columns. You multiply each appliance’s <strong>nameplate input</strong> by the <strong>IAPMO column factor</strong> (e.g., 70% for a typical furnace &lt;225 kBtuh, 30% for a 40‑gal DHW tank, 10% for a range), sum diversified loads, check <strong>winter vs summer</strong>, convert to <strong>CFH</strong>, and size the <strong>service, meter, and service regulator</strong> to the larger peak. This is a <strong>utility‑side engineering method</strong> only; <strong>interior piping</strong> remains governed by <strong>NFPA 54</strong> as adopted in MA/NH/ME. (<a href="https://fcpros.com/wp-content/uploads/2023/04/NFPA-54-2021-FR.300.10_Part1.pdf?utm_source=chatgpt.com" title="NFPA 54 2021" target="_blank" rel="noopener noreferrer">Fireplace and Chimney Professionals</a>)</p>
+                    <hr>
+                    <h4>2) What “IAPMO (Lenient)” means here</h4>
+                    <ul>
+                        <li><strong>It’s an operator‑standardized mapping</strong>, not a direct copy of a single IAPMO table. IAPMO’s <strong>Uniform Mechanical Code (UMC)</strong> recognizes <strong>diversity/demand factors</strong> and, in specific contexts (notably <strong>manufactured home communities</strong>), provides <strong>gas piping demand‑factor tables</strong>. That code‑level recognition underpins the notion that simultaneity can be <strong>significantly less than 100%</strong> for some end uses—hence a “lenient” column for utility service/meter sizing. (<a href="https://epubs.iapmo.org/2024/UMC/?utm_source=chatgpt.com" title="2024 Uniform Mechanical Code" target="_blank" rel="noopener noreferrer">epubs.iapmo.org</a>, <a href="https://webstore.ansi.org/preview-pages/IAPMO/preview_IAPMO%2BUMC-2012.pdf?srsltid=AfmBOoo0AXrFi329VCyq2VydErXunXs8Ab6nFz2JqnzmxTYsJr1I9ysX&amp;utm_source=chatgpt.com" title="This is a preview of &quot;IAPMO/ANSI UMC-2012&quot;. Click here to ..." target="_blank" rel="noopener noreferrer">ANSI Webstore</a>)</li>
+                        <li><strong>Where UMC shows this explicitly.</strong> UMC editions include <strong>Chapter 13 (Fuel Gas Piping)</strong> and appendices addressing community gas systems with <strong>“Demand Factors for Use in Calculating Gas Piping Systems in Manufactured Home Communities.”</strong> (e.g., <strong>Table D 107.1</strong> in the 2015/2024 UMC indices). Several jurisdictions echo similar tables. These are not one‑to‑one with your appliance list, but they establish the principle that <strong>demand factors</strong> are part of IAPMO’s fuel gas toolkit. (<a href="https://epubs.iapmo.org/2021/UMC/?utm_source=chatgpt.com" title="2021 Uniform Mechanical Code" target="_blank" rel="noopener noreferrer">epubs.iapmo.org</a>, <a href="https://online.encodeplus.com/regs/lincoln-ne/doc-viewer.aspx?secid=10610&amp;utm_source=chatgpt.com" title="Chapter 24.05 LINCOLN GAS PIPING SYSTEMS CODE" target="_blank" rel="noopener noreferrer">EncodePlus</a>)</li>
+                        <li><strong>IAPMO’s broader diversity work.</strong> IAPMO also develops probabilistic <strong>diversity</strong> methods on the water side (e.g., the <strong>Water Demand Calculator</strong>), illustrating the organization’s longstanding use of <strong>diversity</strong> to avoid oversizing peak flows. (This supports—but does not define—our gas diversity mapping.) (<a href="https://iapmo.org/media/4bfeqmyh/flow-diversity-white-paper.pdf?utm_source=chatgpt.com" title="Increase in Flow Diversity From Simultaneous Fixture Use" target="_blank" rel="noopener noreferrer">IAPMO</a>)</li>
+                    </ul>
+                    <blockquote>
+                        <p><strong>Bottom line:</strong> The <strong>IAPMO (Lenient)</strong> column is a <strong>utility practice</strong> aligned with IAPMO’s acceptance of demand/diversity concepts—used to right‑size <strong>utility‑owned</strong> assets—<strong>not</strong> to replace interior piping code methods.</p>
+                    </blockquote>
+                    <hr>
+                    <h4>3) Regulatory boundary in MA, NH, and ME (why this is utility‑side only)</h4>
+                    <ul>
+                        <li><strong>Interior fuel gas code in all three states</strong> → <strong>NFPA 54 (National Fuel Gas Code)</strong>, as adopted/amended locally:
+                            <ul>
+                                <li><strong>Massachusetts:</strong> <strong>248 CMR 5.00</strong> (Amendments to NFPA 54). (<a href="https://www.mass.gov/regulations/248-CMR-500-amendments-to-nfpa-54?utm_source=chatgpt.com" title="248 CMR 5.00: Amendments to NFPA 54" target="_blank" rel="noopener noreferrer">Mass.gov</a>)</li>
+                                <li><strong>New Hampshire:</strong> State‑adopted codes list <strong>2021 NFPA 54</strong> (via <strong>Saf‑FMO 300</strong>); NH building code notes IFGC fuel‑gas chapters are <strong>not</strong> adopted—fuel gas is under the <strong>NH Fire Code</strong> (NFPA 54). (<a href="https://mm.nh.gov/files/uploads/fmo/remote-docs/nh-adopted-codes-august-2024.pdf?utm_source=chatgpt.com" title="State of New Hampshire List of Adopted Building and Fire ..." target="_blank" rel="noopener noreferrer">NH DHHS</a>, <a href="https://www.merrimacknh.gov/fire-and-rescue-department/building-code-enforcement-inspectional-services/files/nh-state-building?utm_source=chatgpt.com" title="New Hampshire Building Code Amendments July 1, 2025" target="_blank" rel="noopener noreferrer">Merrimack, NH</a>)</li>
+                                <li><strong>Maine:</strong> State Fire Marshal lists <strong>NFPA 54 (2021)</strong> among adopted standards; rule pages reaffirm adoption. (<a href="https://www.maine.gov/dps/fmo/fire-service-laws/nfpa?utm_source=chatgpt.com" title="State Adopted NFPA Standards | Office of State Fire Marshal" target="_blank" rel="noopener noreferrer">Maine</a>)</li>
+                            </ul>
+                        </li>
+                        <li><strong>What NFPA 54 requires for interior piping.</strong> NFPA 54 pipe‑sizing provisions state gas piping shall be sized to provide a supply sufficient to meet the <strong>maximum demand</strong> of all appliances; the <strong>total connected hourly load</strong> is the basis when using the prescriptive tables—i.e., <strong>no diversity</strong> unless a code‑accepted method is explicitly provided. (<a href="https://fcpros.com/wp-content/uploads/2023/04/NFPA-54-2021-FR.300.10_Part1.pdf?utm_source=chatgpt.com" title="NFPA 54 2021" target="_blank" rel="noopener noreferrer">Fireplace and Chimney Professionals</a>, <a href="https://www.rrc.texas.gov/media/mibhexcz/lpg-service-install-sg.pdf?utm_source=chatgpt.com" title="LPG Service and Installation Guide" target="_blank" rel="noopener noreferrer">rrc.texas.gov</a>)</li>
+                    </ul>
+                    <p><strong>Implication:</strong> Use <strong>IAPMO (Lenient)</strong> for <strong>utility‑side</strong> service/meter/regulator design only. Keep <strong>interior piping</strong> under NFPA 54/MA 248 CMR/NH Saf‑FMO/ME rules. (<a href="https://www.mass.gov/regulations/248-CMR-500-amendments-to-nfpa-54?utm_source=chatgpt.com" title="248 CMR 5.00: Amendments to NFPA 54" target="_blank" rel="noopener noreferrer">Mass.gov</a>, <a href="https://mm.nh.gov/files/uploads/fmo/remote-docs/nh-adopted-codes-august-2024.pdf?utm_source=chatgpt.com" title="State of New Hampshire List of Adopted Building and Fire ..." target="_blank" rel="noopener noreferrer">NH DHHS</a>, <a href="https://www.maine.gov/dps/fmo/fire-service-laws/nfpa?utm_source=chatgpt.com" title="State Adopted NFPA Standards | Office of State Fire Marshal" target="_blank" rel="noopener noreferrer">Maine</a>)</p>
+                    <hr>
+                    <h4>4) The IAPMO (Lenient) reference table (residential)</h4>
+                    <blockquote>
+                        <p>These values reproduce your <strong>IAPMO (Lenient)</strong> column so you have a single, portable document. They are <strong>operator‑standardized</strong> for utility use; they are <strong>not</strong> an official UMC appliance table.</p>
+                    </blockquote>
+                    <div class="factor-reference-list">
+                        <h5>4.1 Heating</h5>
+                        <p>Forced‑air furnace &lt;225 kBtuh <strong>70%</strong> <span class="middot">&middot;</span> ≥225 kBtuh <strong>65%</strong> <span class="middot">&middot;</span> Hydronic boiler &lt;300 kBtuh <strong>70%</strong> <span class="middot">&middot;</span> ≥300 kBtuh <strong>65%</strong> <span class="middot">&middot;</span> Combi <strong>75%</strong> <span class="middot">&middot;</span> Unit heater <strong>70%</strong> <span class="middot">&middot;</span> Direct‑vent wall furnace <strong>70%</strong> <span class="middot">&middot;</span> Radiant tube <strong>85%</strong> <span class="middot">&middot;</span> RTU <strong>85%</strong> <span class="middot">&middot;</span> MUA <strong>100%</strong> <span class="middot">&middot;</span> Driveway/snow‑melt boiler <strong>100%</strong></p>
+                        <h5>4.2 Hot Water</h5>
+                        <p>Tank &lt;50 gal <strong>30%</strong> <span class="middot">&middot;</span> 50–100 gal <strong>25%</strong> <span class="middot">&middot;</span> &gt;100 gal <strong>20%</strong> <span class="middot">&middot;</span> Power‑vent <strong>30%</strong> <span class="middot">&middot;</span> On‑demand <strong>20%</strong> <span class="middot">&middot;</span> Indirect (boiler) <strong>15%</strong> <span class="middot">&middot;</span> Booster <strong>15%</strong></p>
+                        <h5>4.3 Cooking</h5>
+                        <p>Range/oven <strong>10%</strong> <span class="middot">&middot;</span> Cooktop <strong>8%</strong> <span class="middot">&middot;</span> Double wall oven <strong>10%</strong> <span class="middot">&middot;</span> Commercial‑style range <strong>15%</strong> <span class="middot">&middot;</span> Grill (built‑in) <strong>3%</strong> <span class="middot">&middot;</span> Outdoor kitchen <strong>5%</strong> <span class="middot">&middot;</span> Deep fryer <strong>8%</strong></p>
+                        <h5>4.4 Clothes Dryers</h5>
+                        <p>Standard <strong>20%</strong> <span class="middot">&middot;</span> High‑capacity <strong>20%</strong> <span class="middot">&middot;</span> Dryer/steamer <strong>20%</strong></p>
+                        <h5>4.5 Fireplaces & Stoves</h5>
+                        <p>Insert <strong>15%</strong> <span class="middot">&middot;</span> Direct‑vent fireplace <strong>15%</strong> <span class="middot">&middot;</span> Gas stove <strong>15%</strong> <span class="middot">&middot;</span> Gas log set <strong>10%</strong> <span class="middot">&middot;</span> Outdoor fire pit <strong>5%</strong> <span class="middot">&middot;</span> Patio heater <strong>40%</strong></p>
+                        <h5>4.6 Pool & Spa Heaters</h5>
+                        <p>Pool <strong>100%</strong> <span class="middot">&middot;</span> Spa <strong>100%</strong> <span class="middot">&middot;</span> Combined <strong>100%</strong></p>
+                        <h5>4.7 Home Generators</h5>
+                        <p>Air‑cooled 7–22 kW <strong>100%</strong> <span class="middot">&middot;</span> Liquid‑cooled &gt;22 kW <strong>100%</strong><br>
+                        <em>Rationale:</em> Manufacturer curves show a 22 kW unit at <strong>~327 scfh NG</strong> at full load; the fuel line <strong>must</strong> be sized for full‑load scfh and inlet pressure. (<a href="https://www.generac.com/globalassets/products/residential/standby-generators/spec-sheets/20-24kw-guardian-standby-generator-specsheet.pdf?utm_source=chatgpt.com" title="20/22/24 kW" target="_blank" rel="noopener noreferrer">Generac Power Systems</a>)</p>
+                        <h5>4.8 Other</h5>
+                        <p>Gas lighting <strong>30%</strong> <span class="middot">&middot;</span> Incinerator <strong>3%</strong> <span class="middot">&middot;</span> Gas refrigerator <strong>40%</strong></p>
+                    </div>
+                    <hr>
+                    <h4>5) How to apply (operator procedure)</h4>
+                    <ol>
+                        <li><strong>Inventory</strong> each appliance’s nameplate <strong>BTU/h</strong>.</li>
+                        <li><strong>Pick one column</strong> for the job—here, <strong>IAPMO (Lenient)</strong> for all appliances.</li>
+                        <li><strong>Multiply</strong> nameplate × factor to get per‑appliance <strong>diversified BTU/h</strong>.</li>
+                        <li>Compute <strong>Winter Peak</strong> (heat + DHW + cooking + dryer + fireplaces + generator) and <strong>Summer Peak</strong> (pool/spa + DHW + cooking + outdoor + generator).</li>
+                        <li><strong>Design to the larger</strong> of Winter vs Summer diversified sums.</li>
+                        <li><strong>Convert to CFH:</strong> CFH ≈ BTU/h ÷ <strong>HHV</strong>. If your system HHV isn’t handy, the U.S. delivered‑gas average is about <strong>1,036 Btu/ft³</strong> (use local value if available). (<a href="https://www.eia.gov/energyexplained/units-and-calculators/british-thermal-units.php?utm_source=chatgpt.com" title="British thermal units (Btu) - U.S. Energy Information ..." target="_blank" rel="noopener noreferrer">U.S. Energy Information Administration</a>)</li>
+                        <li><strong>Meter selection:</strong> Choose a meter whose <strong>rated CFH at ½″ w.c. ΔP</strong> ≥ diversified CFH (e.g., <strong>AC‑250 = 250 CFH</strong>, <strong>AL‑425 = 425 CFH</strong>, <strong>AL‑800 = 800 CFH</strong>—verify current cut sheets). (<a href="https://pmt.honeywell.com/content/dam/pmt/en/documents/document-lists/brochure/sme-dts-ac-250-nxs-system.pdf?utm_source=chatgpt.com" title="honeywell american meter - ac-250 nxs system" target="_blank" rel="noopener noreferrer">pmt.honeywell.com</a>, <a href="https://www.imacsystems.com/AL-425.pdf?utm_source=chatgpt.com" title="AL-425 Diaphragm Meter" target="_blank" rel="noopener noreferrer">imacsystems.com</a>, <a href="https://process.honeywell.com/us/en/products/utilities/gas/gas-metering/basic-gas-meters/ac-al-am-at-series/commercial-industrial-ac-al-series/al-800-1000-basic?utm_source=chatgpt.com" title="AL-800/1000 Basic" target="_blank" rel="noopener noreferrer">Process Solutions</a>)</li>
+                        <li><strong>Regulator selection:</strong> Verify <strong>capacity at actual inlet/outlet setpoints</strong> from published tables (e.g., <strong>Itron B42</strong> residential; <strong>Itron B31/B531</strong> or <strong>Sensus 243</strong> at higher loads). (<a href="https://www.istec-corp.com/products/gas-regulator-model-b42.pdf?utm_source=chatgpt.com" title="B42 Series Regulator" target="_blank" rel="noopener noreferrer">istec-corp.com</a>, <a href="https://ciciboilers.com/wp-content/uploads/2015/09/Sensus-243.pdf?utm_source=chatgpt.com" title="Model 243 Service Regulators" target="_blank" rel="noopener noreferrer">Cici Boiler Rooms</a>)</li>
+                        <li><strong>Interior piping reminder:</strong> The customer’s interior piping is still sized by <strong>NFPA 54</strong> methods (maximum demand basis). (<a href="https://fcpros.com/wp-content/uploads/2023/04/NFPA-54-2021-FR.300.10_Part1.pdf?utm_source=chatgpt.com" title="NFPA 54 2021" target="_blank" rel="noopener noreferrer">Fireplace and Chimney Professionals</a>)</li>
+                        <li><strong>Document</strong> HHV, chosen column, seasonal worst case, meter/regulator models, and assumptions.</li>
+                    </ol>
+                    <hr>
+                    <h4>6) Why a “lenient” column is technically defensible</h4>
+                    <ul>
+                        <li><strong>UMC acknowledges demand/diversity explicitly.</strong> UMC includes <strong>demand‑factor tables</strong> for gas distribution in <strong>manufactured home communities</strong> and points to <strong>diversity</strong> in its content—formal recognition that not all connected gas loads peak at once. Using a lower simultaneity mapping for utility service/meter design is consistent with this code philosophy (even though MA/NH/ME interior work uses NFPA 54). (<a href="https://epubs.iapmo.org/2024/UMC/?utm_source=chatgpt.com" title="2024 Uniform Mechanical Code" target="_blank" rel="noopener noreferrer">epubs.iapmo.org</a>, <a href="https://webstore.ansi.org/preview-pages/IAPMO/preview_IAPMO%2BUMC-2012.pdf?srsltid=AfmBOoo0AXrFi329VCyq2VydErXunXs8Ab6nFz2JqnzmxTYsJr1I9ysX&amp;utm_source=chatgpt.com" title="This is a preview of &quot;IAPMO/ANSI UMC-2012&quot;. Click here to ..." target="_blank" rel="noopener noreferrer">ANSI Webstore</a>)</li>
+                        <li><strong>IAPMO develops diversity tools.</strong> On the plumbing side, IAPMO’s <strong>Water Demand Calculator</strong> is a probabilistic diversity method that materially reduces peak design flows compared with legacy fixture‑unit tables—an example of <strong>right‑sizing</strong> via diversity that informs our “lenient” stance for gas utility assets. (<a href="https://iapmo.org/media/4bfeqmyh/flow-diversity-white-paper.pdf?utm_source=chatgpt.com" title="Increase in Flow Diversity From Simultaneous Fixture Use" target="_blank" rel="noopener noreferrer">IAPMO</a>)</li>
+                        <li><strong>Local codes still prevail indoors.</strong> NFPA 54 in MA/NH/ME requires interior piping be sized to <strong>maximum demand/total connected hourly load</strong>, so keep this lenient approach <strong>outside the building piping</strong> boundary (service, meter, service regulator). (<a href="https://fcpros.com/wp-content/uploads/2023/04/NFPA-54-2021-FR.300.10_Part1.pdf?utm_source=chatgpt.com" title="NFPA 54 2021" target="_blank" rel="noopener noreferrer">Fireplace and Chimney Professionals</a>)</li>
+                    </ul>
+                    <hr>
+                    <h4>7) Worked examples (using <strong>IAPMO (Lenient)</strong> factors)</h4>
+                    <blockquote>
+                        <p>Assumptions: HHV = <strong>1,036 Btu/ft³</strong>; meter ratings at <strong>½″ w.c. ΔP</strong>. (<a href="https://www.eia.gov/energyexplained/units-and-calculators/british-thermal-units.php?utm_source=chatgpt.com" title="British thermal units (Btu) - U.S. Energy Information ..." target="_blank" rel="noopener noreferrer">U.S. Energy Information Administration</a>, <a href="https://pmt.honeywell.com/content/dam/pmt/en/documents/document-lists/brochure/sme-dts-ac-250-nxs-system.pdf?utm_source=chatgpt.com" title="honeywell american meter - ac-250 nxs system" target="_blank" rel="noopener noreferrer">pmt.honeywell.com</a>)</p>
+                    </blockquote>
+                    <div class="worked-example">
+                        <h5>Example A — Typical single‑family home (winter‑peaking)</h5>
+                        <p><strong>Appliances</strong>: Furnace 100 kBtuh; DHW tank &lt;50 gal 40 kBtuh; Range 65 kBtuh; Dryer 22 kBtuh; Direct‑vent fireplace 30 kBtuh.</p>
+                        <p><strong>Factors</strong>: 70%, 30%, 10%, 20%, 15%.</p>
+                        <ul class="calculation-steps">
+                            <li>Furnace: 100,000 × 0.70 = <strong>70,000 Btu/h</strong></li>
+                            <li>DHW: 40,000 × 0.30 = <strong>12,000</strong></li>
+                            <li>Range: 65,000 × 0.10 = <strong>6,500</strong></li>
+                            <li>Dryer: 22,000 × 0.20 = <strong>4,400</strong></li>
+                            <li>Fireplace: 30,000 × 0.15 = <strong>4,500</strong></li>
+                        </ul>
+                        <p><strong>Winter diversified total = 97,400 Btu/h ⇒ 97,400 / 1,036 = 94.0 CFH.</strong></p>
+                        <p><strong>Implication:</strong> <strong>AC‑250 (250 CFH)</strong> is ample; standard residential regulator (B42) is likely adequate—verify table for actual inlet/outlet setpoints. (<a href="https://pmt.honeywell.com/content/dam/pmt/en/documents/document-lists/brochure/sme-dts-ac-250-nxs-system.pdf?utm_source=chatgpt.com" title="honeywell american meter - ac-250 nxs system" target="_blank" rel="noopener noreferrer">pmt.honeywell.com</a>, <a href="https://www.istec-corp.com/products/gas-regulator-model-b42.pdf?utm_source=chatgpt.com" title="B42 Series Regulator" target="_blank" rel="noopener noreferrer">istec-corp.com</a>)</p>
+                    </div>
+                    <hr>
+                    <div class="worked-example">
+                        <h5>Example B — Large home with combi boiler + standby generator (winter‑peaking)</h5>
+                        <p><strong>Appliances</strong>: Combi 199 kBtuh; Range 65 kBtuh; Dryer 22 kBtuh; DV fireplace 30 kBtuh; <strong>22 kW generator</strong> (use <strong>327 scfh</strong> NG at full load from current spec). (<a href="https://www.generac.com/globalassets/products/residential/standby-generators/spec-sheets/20-24kw-guardian-standby-generator-specsheet.pdf?utm_source=chatgpt.com" title="20/22/24 kW" target="_blank" rel="noopener noreferrer">Generac Power Systems</a>)</p>
+                        <p><strong>Factors</strong>: 75%, 10%, 20%, 15%, <strong>100%</strong> for generator.</p>
+                        <ul class="calculation-steps">
+                            <li>Combi: 199,000 × 0.75 = <strong>149,250 Btu/h</strong></li>
+                            <li>Range: 65,000 × 0.10 = <strong>6,500</strong></li>
+                            <li>Dryer: 22,000 × 0.20 = <strong>4,400</strong></li>
+                            <li>Fireplace: 30,000 × 0.15 = <strong>4,500</strong></li>
+                            <li>Generator: <strong>327 scfh × 1,036 = 338,772 Btu/h</strong></li>
+                        </ul>
+                        <p><strong>Winter diversified total = 503,422 Btu/h ⇒ 503,422 / 1,036 = 485.9 CFH.</strong></p>
+                        <p><strong>Implication:</strong> <strong>AL‑425 (425 CFH)</strong> is <strong>undersized</strong>; select <strong>AL‑800 (800 CFH)</strong> and a higher‑capacity service regulator (e.g., <strong>B31/B531</strong> or <strong>Sensus 243</strong>) set/trimmed per the capacity tables at your inlet/outlet. (<a href="https://www.imacsystems.com/AL-425.pdf?utm_source=chatgpt.com" title="AL-425 Diaphragm Meter" target="_blank" rel="noopener noreferrer">imacsystems.com</a>, <a href="https://process.honeywell.com/us/en/products/utilities/gas/gas-metering/basic-gas-meters/ac-al-am-at-series/commercial-industrial-ac-al-series/al-800-1000-basic?utm_source=chatgpt.com" title="AL-800/1000 Basic" target="_blank" rel="noopener noreferrer">Process Solutions</a>, <a href="https://www.istec-corp.com/products/gas-regulator-model-b531.pdf?utm_source=chatgpt.com" title="B531 Series Commercial Regulator" target="_blank" rel="noopener noreferrer">istec-corp.com</a>, <a href="https://ciciboilers.com/wp-content/uploads/2015/09/Sensus-243.pdf?utm_source=chatgpt.com" title="Model 243 Service Regulators" target="_blank" rel="noopener noreferrer">Cici Boiler Rooms</a>)</p>
+                    </div>
+                    <hr>
+                    <div class="worked-example">
+                        <h5>Example C — Summer‑peaking home with pool heater</h5>
+                        <p><strong>Appliances</strong>: Pool heater <strong>400 kBtuh</strong>; DHW tank &lt;50 gal 40 kBtuh; Range 65 kBtuh; Outdoor kitchen 90 kBtuh.</p>
+                        <p><strong>Factors</strong>: 100%, 30%, 10%, 5%.</p>
+                        <ul class="calculation-steps">
+                            <li>Pool: 400,000 × 1.00 = <strong>400,000 Btu/h</strong></li>
+                            <li>DHW: 40,000 × 0.30 = <strong>12,000</strong></li>
+                            <li>Range: 65,000 × 0.10 = <strong>6,500</strong></li>
+                            <li>Outdoor kitchen: 90,000 × 0.05 = <strong>4,500</strong></li>
+                        </ul>
+                        <p><strong>Summer diversified total = 423,000 Btu/h ⇒ 423,000 / 1,036 = 408.3 CFH.</strong></p>
+                        <p><strong>Implication:</strong> Borderline for <strong>AL‑425</strong>; consider <strong>AL‑800</strong> for margin and regulator headroom. (<a href="https://www.imacsystems.com/AL-800.pdf?utm_source=chatgpt.com" title="AL-800 Diaphragm Meter" target="_blank" rel="noopener noreferrer">imacsystems.com</a>)</p>
+                    </div>
+                    <hr>
+                    <h4>8) When to choose the <strong>IAPMO (Lenient)</strong> column</h4>
+                    <p>Use this column when <strong>any</strong> apply:</p>
+                    <ul>
+                        <li>Loads are <strong>strongly non‑coincident</strong> (e.g., pool/spa, snow‑melt, large outdoor cooking) versus winter heating.</li>
+                        <li>The goal is <strong>right‑sizing utility assets</strong> in dense or cost‑sensitive areas, with good appliance inventory and confidence in seasonal usage patterns.</li>
+                        <li>You have <strong>short service runs / adequate inlet pressure</strong> and want to avoid unnecessary up‑sizing while maintaining compliance on the <strong>utility side</strong>.</li>
+                    </ul>
+                    <blockquote>
+                        <p><strong>Do not use</strong> these lenient factors to size <strong>interior piping</strong> governed by NFPA 54 in MA/NH/ME. (<a href="https://fcpros.com/wp-content/uploads/2023/04/NFPA-54-2021-FR.300.10_Part1.pdf?utm_source=chatgpt.com" title="NFPA 54 2021" target="_blank" rel="noopener noreferrer">Fireplace and Chimney Professionals</a>)</p>
+                    </blockquote>
+                    <hr>
+                    <h4>9) Quality‑assurance checklist (IAPMO column)</h4>
+                    <ul class="checklist">
+                        <li>Complete appliance list with nameplate <strong>MBH</strong>.</li>
+                        <li><strong>IAPMO (Lenient)</strong> column selected and documented (why).</li>
+                        <li><strong>Winter vs Summer</strong> diversified totals computed; larger governs.</li>
+                        <li><strong>HHV</strong> source documented (utility bulletin or <strong>EIA 1,036 Btu/ft³</strong> proxy). (<a href="https://www.eia.gov/energyexplained/units-and-calculators/british-thermal-units.php?utm_source=chatgpt.com" title="British thermal units (Btu) - U.S. Energy Information ..." target="_blank" rel="noopener noreferrer">U.S. Energy Information Administration</a>)</li>
+                        <li><strong>Meter</strong> chosen from cut sheets meets diversified CFH (AC‑250/AL‑425/AL‑800). (<a href="https://pmt.honeywell.com/content/dam/pmt/en/documents/document-lists/brochure/sme-dts-ac-250-nxs-system.pdf?utm_source=chatgpt.com" title="honeywell american meter - ac-250 nxs system" target="_blank" rel="noopener noreferrer">pmt.honeywell.com</a>, <a href="https://www.imacsystems.com/AL-425.pdf?utm_source=chatgpt.com" title="AL-425 Diaphragm Meter" target="_blank" rel="noopener noreferrer">imacsystems.com</a>, <a href="https://process.honeywell.com/us/en/products/utilities/gas/gas-metering/basic-gas-meters/ac-al-am-at-series/commercial-industrial-ac-al-series/al-800-1000-basic?utm_source=chatgpt.com" title="AL-800/1000 Basic" target="_blank" rel="noopener noreferrer">Process Solutions</a>)</li>
+                        <li><strong>Regulator</strong> capacity verified for actual inlet/outlet (B42; B31/B531; Sensus 243). (<a href="https://www.istec-corp.com/products/gas-regulator-model-b42.pdf?utm_source=chatgpt.com" title="B42 Series Regulator" target="_blank" rel="noopener noreferrer">istec-corp.com</a>, <a href="https://ciciboilers.com/wp-content/uploads/2015/09/Sensus-243.pdf?utm_source=chatgpt.com" title="Model 243 Service Regulators" target="_blank" rel="noopener noreferrer">Cici Boiler Rooms</a>)</li>
+                        <li><strong>Interior piping</strong> flagged for NFPA 54 compliance by the installer/AHJ. (<a href="https://www.mass.gov/regulations/248-CMR-500-amendments-to-nfpa-54?utm_source=chatgpt.com" title="248 CMR 5.00: Amendments to NFPA 54" target="_blank" rel="noopener noreferrer">Mass.gov</a>)</li>
+                        <li><strong>Generator</strong> treated at <strong>100%</strong> NG scfh with required inlet pressure available at <strong>all</strong> coincident loads. (<a href="https://www.generac.com/globalassets/products/residential/standby-generators/spec-sheets/20-24kw-guardian-standby-generator-specsheet.pdf?utm_source=chatgpt.com" title="20/22/24 kW" target="_blank" rel="noopener noreferrer">Generac Power Systems</a>)</li>
+                    </ul>
+                    <hr>
+                    <h4>10) Provenance & supporting references (selected)</h4>
+                    <ul>
+                        <li><strong>UMC content & demand factors:</strong> UMC contains <strong>Fuel Gas Piping</strong> and appendices with <strong>gas demand‑factor tables</strong> for manufactured home communities (e.g., <strong>Table D 107.1 / Table 1328.1</strong> by edition). (<a href="https://epubs.iapmo.org/2021/UMC/?utm_source=chatgpt.com" title="2021 Uniform Mechanical Code" target="_blank" rel="noopener noreferrer">epubs.iapmo.org</a>, <a href="https://webstore.ansi.org/preview-pages/IAPMO/preview_IAPMO%2BUMC-2012.pdf?srsltid=AfmBOoo0AXrFi329VCyq2VydErXunXs8Ab6nFz2JqnzmxTYsJr1I9ysX&amp;utm_source=chatgpt.com" title="This is a preview of &quot;IAPMO/ANSI UMC-2012&quot;. Click here to ..." target="_blank" rel="noopener noreferrer">ANSI Webstore</a>)</li>
+                        <li><strong>IAPMO diversity work (water):</strong> <strong>Flow Diversity</strong> white paper underpinning the Water Demand Calculator approach (conceptual support for diversity). (<a href="https://iapmo.org/media/4bfeqmyh/flow-diversity-white-paper.pdf?utm_source=chatgpt.com" title="Increase in Flow Diversity From Simultaneous Fixture Use" target="_blank" rel="noopener noreferrer">IAPMO</a>)</li>
+                        <li><strong>State adoption of NFPA 54:</strong> MA <strong>248 CMR 5.00</strong>; NH adopted codes (NFPA 54 via <strong>Saf‑FMO 300</strong>); ME State Fire Marshal NFPA list. (<a href="https://www.mass.gov/regulations/248-CMR-500-amendments-to-nfpa-54?utm_source=chatgpt.com" title="248 CMR 5.00: Amendments to NFPA 54" target="_blank" rel="noopener noreferrer">Mass.gov</a>, <a href="https://mm.nh.gov/files/uploads/fmo/remote-docs/nh-adopted-codes-august-2024.pdf?utm_source=chatgpt.com" title="State of New Hampshire List of Adopted Building and Fire ..." target="_blank" rel="noopener noreferrer">NH DHHS</a>, <a href="https://www.maine.gov/dps/fmo/fire-service-laws/nfpa?utm_source=chatgpt.com" title="State Adopted NFPA Standards | Office of State Fire Marshal" target="_blank" rel="noopener noreferrer">Maine</a>)</li>
+                        <li><strong>NFPA 54 interior sizing principle:</strong> Interior piping sized to <strong>maximum demand</strong> / <strong>total connected hourly load</strong> basis. (<a href="https://fcpros.com/wp-content/uploads/2023/04/NFPA-54-2021-FR.300.10_Part1.pdf?utm_source=chatgpt.com" title="NFPA 54 2021" target="_blank" rel="noopener noreferrer">Fireplace and Chimney Professionals</a>, <a href="https://www.rrc.texas.gov/media/mibhexcz/lpg-service-install-sg.pdf?utm_source=chatgpt.com" title="LPG Service and Installation Guide" target="_blank" rel="noopener noreferrer">rrc.texas.gov</a>)</li>
+                        <li><strong>Meters:</strong> <strong>AC‑250 (250 CFH)</strong>; <strong>AL‑425 (425 CFH)</strong>; <strong>AL‑800 (800 CFH)</strong>—manufacturer literature. (<a href="https://pmt.honeywell.com/content/dam/pmt/en/documents/document-lists/brochure/sme-dts-ac-250-nxs-system.pdf?utm_source=chatgpt.com" title="honeywell american meter - ac-250 nxs system" target="_blank" rel="noopener noreferrer">pmt.honeywell.com</a>, <a href="https://www.imacsystems.com/AL-425.pdf?utm_source=chatgpt.com" title="AL-425 Diaphragm Meter" target="_blank" rel="noopener noreferrer">imacsystems.com</a>, <a href="https://process.honeywell.com/us/en/products/utilities/gas/gas-metering/basic-gas-meters/ac-al-am-at-series/commercial-industrial-ac-al-series/al-800-1000-basic?utm_source=chatgpt.com" title="AL-800/1000 Basic" target="_blank" rel="noopener noreferrer">Process Solutions</a>)</li>
+                        <li><strong>Regulators:</strong> <strong>Itron B42</strong> residential; <strong>Itron B31/B531</strong>; <strong>Sensus 243</strong>—capacity sheets. (<a href="https://www.istec-corp.com/products/gas-regulator-model-b42.pdf?utm_source=chatgpt.com" title="B42 Series Regulator" target="_blank" rel="noopener noreferrer">istec-corp.com</a>, <a href="https://ciciboilers.com/wp-content/uploads/2015/09/Sensus-243.pdf?utm_source=chatgpt.com" title="Model 243 Service Regulators" target="_blank" rel="noopener noreferrer">Cici Boiler Rooms</a>)</li>
+                        <li><strong>Generators:</strong> <strong>Generac 20/22/24 kW</strong> spec sheet and product page showing <strong>NG 327 scfh</strong> at full load (22 kW). (<a href="https://www.generac.com/globalassets/products/residential/standby-generators/spec-sheets/20-24kw-guardian-standby-generator-specsheet.pdf?utm_source=chatgpt.com" title="20/22/24 kW" target="_blank" rel="noopener noreferrer">Generac Power Systems</a>)</li>
+                        <li><strong>CFH↔BTU conversion:</strong> <strong>EIA</strong> (1,036 Btu per cubic foot typical for delivered NG). (<a href="https://www.eia.gov/energyexplained/units-and-calculators/british-thermal-units.php?utm_source=chatgpt.com" title="British thermal units (Btu) - U.S. Energy Information ..." target="_blank" rel="noopener noreferrer">U.S. Energy Information Administration</a>)</li>
+                    </ul>
+                    <hr>
+                    <h4>11) One‑page SOP language you can drop into your standard</h4>
+                    <div class="formula-box">
+                        <h5>IAPMO Residential Diversity Method (Utility‑Side — Lenient)</h5>
+                        <p><strong>Purpose:</strong> Provide a <strong>lenient simultaneity</strong> approach aligned with IAPMO’s demand/diversity concepts to <strong>right‑size</strong> service, meter, and service regulator capacity at residential premises.</p>
+                        <p><strong>Procedure:</strong> Inventory appliances → apply <strong>IAPMO (Lenient)</strong> factors → compute Winter and Summer diversified sums → design to the larger → convert to CFH using system <strong>HHV</strong> → select meter/regulator from cut sheets → record assumptions/references. <em>Notes:</em> Treat <strong>generators</strong> at <strong>100%</strong> of manufacturer <strong>NG scfh</strong> with required <strong>inlet pressure</strong> under coincident loads. <strong>Interior piping</strong> remains under <strong>NFPA 54</strong> methods in MA/NH/ME.</p>
+                    </div>
+                    <hr>
+                    <h4>Final note</h4>
+                    <p>This document <strong>does not claim</strong> IAPMO publishes these exact appliance percentages. It frames a <strong>lenient, operator‑standardized</strong> set of <strong>appliance demand factors</strong> that is <strong>consistent with IAPMO’s recognition of demand/diversity</strong> (e.g., UMC gas demand‑factor tables for manufactured‑home community systems, and IAPMO’s diversity work on the water side), while respecting that <strong>NFPA 54</strong> governs interior gas piping in MA/NH/ME. (<a href="https://webstore.ansi.org/preview-pages/IAPMO/preview_IAPMO%2BUMC-2012.pdf?srsltid=AfmBOoo0AXrFi329VCyq2VydErXunXs8Ab6nFz2JqnzmxTYsJr1I9ysX&amp;utm_source=chatgpt.com" title="This is a preview of &quot;IAPMO/ANSI UMC-2012&quot;. Click here to ..." target="_blank" rel="noopener noreferrer">ANSI Webstore</a>, <a href="https://iapmo.org/media/4bfeqmyh/flow-diversity-white-paper.pdf?utm_source=chatgpt.com" title="Increase in Flow Diversity From Simultaneous Fixture Use" target="_blank" rel="noopener noreferrer">IAPMO</a>, <a href="https://fcpros.com/wp-content/uploads/2023/04/NFPA-54-2021-FR.300.10_Part1.pdf?utm_source=chatgpt.com" title="NFPA 54 2021" target="_blank" rel="noopener noreferrer">Fireplace and Chimney Professionals</a>)</p>
+                    <p><strong>End of document</strong></p>
+                </div>
+
+                <hr class="section-divider">
+
+                <h2>Section 4: Final Notes</h2>
+                
                 <h3>Important Disclaimer</h3>
                 <p class="disclaimer">This calculator is an estimation tool intended for planning and preliminary assessment. The diversity factors provided are based on common industry standards but may not reflect the specific requirements of your local jurisdiction. <strong>The final authority is always the local utility and the applicable building codes (Authority Having Jurisdiction - AHJ).</strong> Always verify sizing requirements with a qualified professional or your local gas utility before installation.</p>
                 
                 <h3>Sources & References</h3>
                 <ol class="references-list">
                     <li>
-                        <strong>ASHRAE (American Society of Heating, Refrigerating and Air-Conditioning Engineers) Handbook—Fundamentals:</strong> This is the primary source for the core principles of load diversity, the definition of diversity factors, and the conservative values used in engineering. The methodologies are detailed in chapters covering energy estimating and load calculation.
+                        <strong>ASHRAE Handbook—Fundamentals:</strong> Published by the American Society of Heating, Refrigerating and Air-Conditioning Engineers, this multi-volume handbook is widely considered the cornerstone of modern HVAC&R engineering. The <em>Fundamentals</em> volume provides the foundational principles and data for the entire industry. Chapters on load calculations and energy estimating detail the methodologies for applying diversity. ASHRAE's approach is "conservative," meaning its diversity factors are typically higher, resulting in a larger calculated load. This builds in a significant margin of safety, ensuring a system is robust enough to handle near-peak conditions without failure, which is critical for system reliability and longevity.
                         <a href="https://www.ashrae.org/technical-resources/ashrae-handbook" target="_blank" rel="noopener noreferrer">Learn more about the ASHRAE Handbook</a>
                     </li>
                     <li>
-                        <strong>Gas Utility Engineering Standards:</strong> The rationale for 100% diversity factors for life-safety (e.g., generators) and critical high-demand equipment (e.g., pool heaters, snow-melt systems) is a standard practice outlined in the internal engineering manuals of most North American gas utilities. These standards are based on extensive historical usage data and prioritize system reliability and safety.
+                        <strong>Gas Utility Engineering Standards:</strong> While not publicly published, the internal engineering and design manuals of local gas utilities are the ultimate authority for service sizing in their territory. These standards are developed from decades of real-world, localized usage data and empirical analysis. They provide the practical basis for sizing meters, regulators, and service lines. The mandate for using a 100% diversity factor for life-safety equipment (generators) and mission-critical systems (snow-melt boilers, pool heaters) comes directly from these standards. The utility's primary goal is to guarantee the absolute reliability and safety of the gas grid, which means ensuring these critical appliances have an uninterruptible fuel supply at their maximum required rating, regardless of any other loads in the building.
                     </li>
                     <li>
-                        <strong>IAPMO (International Association of Plumbing and Mechanical Officials) Uniform Mechanical Code (UMC):</strong> This code provides the guidelines and requirements for gas piping systems, including sizing tables and rules that implicitly or explicitly account for load diversity. The IAPMO-related factors are derived from the principles within this code.
+                        <strong>IAPMO Uniform Mechanical Code (UMC):</strong> The International Association of Plumbing and Mechanical Officials develops model codes that are adopted into law by local and state governments. The UMC provides the minimum standards for the safe installation of mechanical systems, including gas piping <em>downstream</em> of the utility meter. Its gas pipe sizing tables (often based on the "longest pipe run" method) inherently account for a degree of diversity. The factors associated with IAPMO are sometimes considered more "lenient" because they are designed to meet the minimum safety code for a standard installation, whereas an engineering standard like ASHRAE is focused on designing a system for optimal performance and a higher degree of robustness.
                         <a href="https://www.iapmo.org/uniform-codes/uniform-mechanical-code-umc" target="_blank" rel="noopener noreferrer">Explore the Uniform Mechanical Code (UMC)</a>
                     </li>
                 </ol>
@@ -240,6 +721,7 @@
         <p>Users should always consult with industry standards as they will change</p>
     </footer>
 
+    <div id="toast-container"></div>
     <script type="module" src="index.tsx"></script>
 <script type="module" src="/index.tsx"></script>
 </body>

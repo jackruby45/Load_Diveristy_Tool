@@ -1,4 +1,5 @@
-import { jsPDF } from 'jspdf';
+// FIX: Changed import to use default export for jsPDF
+import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
 // --- TYPE DEFINITIONS ---
@@ -106,23 +107,39 @@ const CATEGORY_DIVERSITY_DEFAULTS: { [category: string]: { [standard: string]: n
     "Other Appliances": { default: 50, ashrae: 60, iapmo: 40 },
 };
 
+const SEASONAL_USAGE: { [category: string]: 'winter' | 'summer' | 'year-round' } = {
+    "Heating": 'winter',
+    "Hot Water": 'year-round',
+    "Cooking": 'year-round',
+    "Clothes Dryers": 'year-round',
+    "Fireplaces & Stoves": 'winter',
+    "Pool & Spa Heaters": 'summer',
+    "Home Generators": 'year-round', // Critical load, can run anytime
+    "Other Appliances": 'year-round',
+    "Custom": 'year-round'
+};
+
 // --- DOM ELEMENT SELECTORS ---
 const applianceList = document.getElementById('appliance-list')!;
 const addApplianceBtn = document.getElementById('add-appliance-btn')!;
-const calculateBtn = document.getElementById('calculate-btn')!;
 const resultsUnitsSelect = document.getElementById('results-units') as HTMLSelectElement;
 const gasEnergyContentInput = document.getElementById('gas-energy-content') as HTMLInputElement;
 const diversityStandardSelect = document.getElementById('diversity-standard') as HTMLSelectElement;
 const totalConnectedLoadEl = document.getElementById('total-connected-load')!;
+const winterPeakLoadEl = document.getElementById('winter-peak-load')!;
+const summerPeakLoadEl = document.getElementById('summer-peak-load')!;
 const totalDiversifiedLoadEl = document.getElementById('total-diversified-load')!;
 const saveBtn = document.getElementById('save-btn')!;
 const loadBtn = document.getElementById('load-btn')!;
 const loadInput = document.getElementById('load-input') as HTMLInputElement;
 const exportPdfBtn = document.getElementById('export-pdf-btn')!;
 const form = document.getElementById('calculator-form') as HTMLFormElement;
+const methodologyDisplayEl = document.getElementById('methodology-display')!;
+const showDetailsBtn = document.getElementById('show-details-btn') as HTMLButtonElement;
+const calculationDetailsEl = document.getElementById('calculation-details')!;
 
 // --- STATE ---
-let calculatedResults = { connectedBtu: 0, diversifiedBtu: 0 };
+let calculatedResults = { connectedBtu: 0, diversifiedBtu: 0, winterPeakBtu: 0, summerPeakBtu: 0 };
 
 // --- UTILITY FUNCTIONS ---
 const generateId = () => `appliance-${Date.now()}-${Math.random()}`;
@@ -145,7 +162,50 @@ const convertFromBtu = (value: number, unit: string, gasEnergy: number): number 
     }
 };
 
+function showToast(message: string, duration = 5000, type: 'error' | 'success' = 'error') {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 100);
+
+    setTimeout(() => {
+        toast.classList.remove('show');
+        toast.addEventListener('transitionend', () => toast.remove());
+    }, duration);
+}
+
+
 // --- CORE FUNCTIONS ---
+function updateMethodologyDisplay() {
+    if (!methodologyDisplayEl) return;
+    const standardKey = diversityStandardSelect.value;
+    const standardName = DIVERSITY_STANDARDS[standardKey] || 'the selected';
+
+    methodologyDisplayEl.innerHTML = `
+        <p>Calculations are based on the principle of load diversity, where the diversified load for each appliance is determined by applying a specific factor to its maximum input rating.</p>
+        <div class="formula-box">
+            Diversified Load = Max Input Rating × (Diversity Factor / 100)
+        </div>
+        <p>The <strong>Design Load</strong> is the greater of the calculated <strong>Winter Peak</strong> and <strong>Summer Peak</strong> diversified loads. The diversity factors currently applied are from the <strong>${standardName}</strong> standard.</p>
+    `;
+}
+
+
+function updateEmptyState() {
+    const emptyState = document.getElementById('empty-state');
+    if (!emptyState) return;
+    const hasAppliances = applianceList.querySelector('.appliance-row:not(.header)');
+    emptyState.style.display = hasAppliances ? 'none' : 'block';
+}
+
 function addApplianceRow(appliance?: ApplianceState) {
     const rowId = appliance?.id || generateId();
     const row = document.createElement('div');
@@ -157,28 +217,52 @@ function addApplianceRow(appliance?: ApplianceState) {
     const diversitySourceOptions = Object.keys(CATEGORY_DIVERSITY_DEFAULTS).map(cat => `<option value="${cat}" ${appliance?.diversitySource === cat ? 'selected' : ''}>${cat}</option>`).join('');
 
     row.innerHTML = `
-        <select class="category-select" aria-label="Appliance Category"><option value="" selected disabled>Select Category...</option>${categoryOptions}</select>
-        <div class="equipment-container">
-            <select class="equipment-select" aria-label="Equipment Type"></select>
-            <input type="text" class="custom-equipment-input" style="display: none;" placeholder="Appliance Name" aria-label="Custom Equipment Name" value="${(appliance?.category === 'Custom' ? appliance.equipment : '')}">
+        <div class="form-group">
+            <label for="category-${rowId}">Category</label>
+            <select id="category-${rowId}" class="category-select"><option value="" selected disabled>Select Category...</option>${categoryOptions}</select>
         </div>
-        <input type="number" class="rating-input" aria-label="Max Input Rating" value="${appliance?.rating ?? ''}" min="0" placeholder="e.g., 120000">
-        <div class="radio-group">
-            <label><input type="radio" name="units-${rowId}" value="BTU/hr" ${appliance?.units === 'BTU/hr' ? 'checked' : ''}> BTU/hr</label>
-            <label><input type="radio" name="units-${rowId}" value="MMBTU/hr" ${appliance?.units === 'MMBTU/hr' ? 'checked' : ''}> MMBTU/hr</label>
-            <label><input type="radio" name="units-${rowId}" value="CFH" ${appliance?.units === 'CFH' || !appliance ? 'checked' : ''}> CFH</label>
+        <div class="form-group">
+            <label for="equipment-select-${rowId}">Equipment Type</label>
+            <div class="equipment-container">
+                <select id="equipment-select-${rowId}" class="equipment-select"></select>
+                <input type="text" class="custom-equipment-input" style="display: none;" placeholder="Appliance Name" value="${(appliance?.category === 'Custom' ? appliance.equipment : '')}">
+            </div>
         </div>
-        <div class="diversity-container">
-            <input type="number" class="diversity-input" aria-label="Diversity Factor" value="${appliance?.diversity ?? 0}" min="0" max="100">
-            <select class="diversity-source-select" style="display: none;" aria-label="Diversity Source Category" required>
-               <option value="" disabled ${!appliance?.diversitySource ? 'selected' : ''}>Select category...</option>
-               ${diversitySourceOptions}
+        <div class="form-group">
+            <label for="rating-${rowId}">Max Input Rating</label>
+            <input type="number" id="rating-${rowId}" class="rating-input" value="${appliance?.rating ?? ''}" min="0" placeholder="e.g., 120000">
+        </div>
+        <div class="form-group">
+            <label for="units-${rowId}">Units</label>
+            <select id="units-${rowId}" class="units-select">
+                <option value="CFH" ${!appliance || appliance.units === 'CFH' ? 'selected' : ''}>CFH</option>
+                <option value="BTU/hr" ${appliance?.units === 'BTU/hr' ? 'selected' : ''}>BTU/hr</option>
+                <option value="MMBTU/hr" ${appliance?.units === 'MMBTU/hr' ? 'selected' : ''}>MMBTU/hr</option>
             </select>
         </div>
-        <button type="button" class="remove-btn button-danger">Remove</button>
+        <div class="form-group">
+            <label for="diversity-${rowId}">Diversity Factor (%)</label>
+            <div class="diversity-container">
+                <input type="number" id="diversity-${rowId}" class="diversity-input" value="${appliance?.diversity ?? 0}" min="0" max="100">
+                <select class="diversity-source-select" style="display: none;" required>
+                   <option value="" disabled ${!appliance?.diversitySource ? 'selected' : ''}>Select category...</option>
+                   ${diversitySourceOptions}
+                </select>
+            </div>
+        </div>
+        <div class="form-group action-group">
+            <label class="action-label">&nbsp;</label>
+            <button type="button" class="remove-btn button-danger">Remove</button>
+        </div>
     `;
 
+    // Add row to DOM and animate it in
     applianceList.appendChild(row);
+    
+    requestAnimationFrame(() => {
+      row.classList.add('show');
+    });
+
 
     const categorySelect = row.querySelector('.category-select') as HTMLSelectElement;
     if (appliance?.category) {
@@ -262,35 +346,152 @@ function updateAllDiversityFactors() {
 
 
 function calculate() {
-    const gasEnergy = parseFloat(gasEnergyContentInput.value) || 1040;
+    const gasEnergy = parseFloat(gasEnergyContentInput.value) || 1036;
     let totalConnected = 0;
-    let totalDiversified = 0;
+    let winterPeak = 0;
+    let summerPeak = 0;
 
     document.querySelectorAll('.appliance-row').forEach(row => {
         if (row.classList.contains('header')) return;
         
         const rating = parseFloat((row.querySelector('.rating-input') as HTMLInputElement).value) || 0;
-        const units = (row.querySelector('input[type="radio"]:checked') as HTMLInputElement).value;
+        const units = (row.querySelector('.units-select') as HTMLSelectElement).value;
         const diversity = parseFloat((row.querySelector('.diversity-input') as HTMLInputElement).value) || 0;
+        const category = (row.querySelector('.category-select') as HTMLSelectElement).value;
 
         const ratingInBtu = convertToBtu(rating, units, gasEnergy);
         totalConnected += ratingInBtu;
-        totalDiversified += ratingInBtu * (diversity / 100);
+        const diversifiedBtu = ratingInBtu * (diversity / 100);
+
+        const season = SEASONAL_USAGE[category] || 'year-round';
+
+        if (season === 'winter' || season === 'year-round') {
+            winterPeak += diversifiedBtu;
+        }
+        if (season === 'summer' || season === 'year-round') {
+            summerPeak += diversifiedBtu;
+        }
     });
 
-    calculatedResults = { connectedBtu: totalConnected, diversifiedBtu: totalDiversified };
+    const designLoad = Math.max(winterPeak, summerPeak);
+
+    calculatedResults = { 
+        connectedBtu: totalConnected, 
+        diversifiedBtu: designLoad,
+        winterPeakBtu: winterPeak,
+        summerPeakBtu: summerPeak,
+    };
     updateResultDisplay();
+    updateCalculationDetails();
 }
 
 function updateResultDisplay() {
     const displayUnit = resultsUnitsSelect.value;
-    const gasEnergy = parseFloat(gasEnergyContentInput.value) || 1040;
+    const gasEnergy = parseFloat(gasEnergyContentInput.value) || 1036;
 
     const connected = convertFromBtu(calculatedResults.connectedBtu, displayUnit, gasEnergy);
+    const winter = convertFromBtu(calculatedResults.winterPeakBtu, displayUnit, gasEnergy);
+    const summer = convertFromBtu(calculatedResults.summerPeakBtu, displayUnit, gasEnergy);
     const diversified = convertFromBtu(calculatedResults.diversifiedBtu, displayUnit, gasEnergy);
 
     totalConnectedLoadEl.textContent = `${connected.toLocaleString(undefined, {maximumFractionDigits: 2})} ${displayUnit}`;
+    winterPeakLoadEl.textContent = `${winter.toLocaleString(undefined, {maximumFractionDigits: 2})} ${displayUnit}`;
+    summerPeakLoadEl.textContent = `${summer.toLocaleString(undefined, {maximumFractionDigits: 2})} ${displayUnit}`;
     totalDiversifiedLoadEl.textContent = `${diversified.toLocaleString(undefined, {maximumFractionDigits: 2})} ${displayUnit}`;
+}
+
+function updateCalculationDetails() {
+    const displayUnit = resultsUnitsSelect.value;
+    const gasEnergy = parseFloat(gasEnergyContentInput.value) || 1036;
+
+    const seasonalAppliances: { [key: string]: { name: string, rating: number, diversity: number, diversifiedValue: number }[] } = {
+        winter: [],
+        summer: [],
+        'year-round': []
+    };
+    
+    let subtotalWinter = 0;
+    let subtotalSummer = 0;
+    let subtotalYearRound = 0;
+
+    document.querySelectorAll('.appliance-row').forEach(row => {
+        if (row.classList.contains('header')) return;
+        const rating = parseFloat((row.querySelector('.rating-input') as HTMLInputElement).value) || 0;
+        const units = (row.querySelector('.units-select') as HTMLSelectElement).value;
+        const diversity = parseFloat((row.querySelector('.diversity-input') as HTMLInputElement).value) || 0;
+        const category = (row.querySelector('.category-select') as HTMLSelectElement).value;
+        const equipment = (row.querySelector('.equipment-select') as HTMLSelectElement).value || (row.querySelector('.custom-equipment-input') as HTMLInputElement).value;
+        
+        if (!category || !equipment) return;
+        
+        const ratingInBtu = convertToBtu(rating, units, gasEnergy);
+        const diversifiedBtu = ratingInBtu * (diversity / 100);
+        
+        const ratingDisplay = convertFromBtu(ratingInBtu, displayUnit, gasEnergy);
+        const diversifiedDisplay = convertFromBtu(diversifiedBtu, displayUnit, gasEnergy);
+        
+        const season = SEASONAL_USAGE[category] || 'year-round';
+        seasonalAppliances[season].push({ name: equipment, rating: ratingDisplay, diversity: diversity, diversifiedValue: diversifiedDisplay });
+        
+        if (season === 'winter') subtotalWinter += diversifiedDisplay;
+        if (season === 'summer') subtotalSummer += diversifiedDisplay;
+        if (season === 'year-round') subtotalYearRound += diversifiedDisplay;
+    });
+    
+    const formatValue = (val: number) => val.toLocaleString(undefined, { maximumFractionDigits: 2 });
+    
+    const renderList = (items: {name: string, rating: number, diversity: number, diversifiedValue: number}[]) => {
+        if (items.length === 0) return '<li class="no-items">None</li>';
+        return items.map(item => `
+            <li class="calculation-line">
+                <div class="item-name">${item.name}</div>
+                <div class="item-formula">
+                    <span class="formula-part formula-rating">${formatValue(item.rating)} ${displayUnit}</span>
+                    <span class="formula-part formula-operator">×</span>
+                    <span class="formula-part formula-diversity">${item.diversity}%</span>
+                    <span class="formula-part formula-operator">=</span>
+                    <span class="formula-part formula-result">${formatValue(item.diversifiedValue)} ${displayUnit}</span>
+                </div>
+            </li>`).join('');
+    };
+
+    const winterTotal = subtotalWinter + subtotalYearRound;
+    const summerTotal = subtotalSummer + subtotalYearRound;
+
+    calculationDetailsEl.innerHTML = `
+        <div class="details-column">
+            <h4>Winter Peak Calculation</h4>
+            <ul class="details-list">
+                <li class="category-title"><strong>Winter Loads</strong></li>
+                ${renderList(seasonalAppliances.winter)}
+                <li class="subtotal"><strong>Subtotal: ${formatValue(subtotalWinter)} ${displayUnit}</strong></li>
+                
+                <li class="category-title"><strong>Year-Round Loads</strong></li>
+                ${renderList(seasonalAppliances['year-round'])}
+                <li class="subtotal"><strong>Subtotal: ${formatValue(subtotalYearRound)} ${displayUnit}</strong></li>
+            </ul>
+            <div class="final-calculation">
+                <strong>Total Winter Peak:</strong>
+                <span>${formatValue(subtotalWinter)} + ${formatValue(subtotalYearRound)} = <strong>${formatValue(winterTotal)} ${displayUnit}</strong></span>
+            </div>
+        </div>
+        <div class="details-column">
+            <h4>Summer Peak Calculation</h4>
+            <ul class="details-list">
+                <li class="category-title"><strong>Summer Loads</strong></li>
+                ${renderList(seasonalAppliances.summer)}
+                <li class="subtotal"><strong>Subtotal: ${formatValue(subtotalSummer)} ${displayUnit}</strong></li>
+
+                <li class="category-title"><strong>Year-Round Loads</strong></li>
+                ${renderList(seasonalAppliances['year-round'])}
+                <li class="subtotal"><strong>Subtotal: ${formatValue(subtotalYearRound)} ${displayUnit}</strong></li>
+            </ul>
+            <div class="final-calculation">
+                <strong>Total Summer Peak:</strong>
+                <span>${formatValue(subtotalSummer)} + ${formatValue(subtotalYearRound)} = <strong>${formatValue(summerTotal)} ${displayUnit}</strong></span>
+            </div>
+        </div>
+    `;
 }
 
 function getFormData(): ProjectData {
@@ -311,7 +512,7 @@ function getFormData(): ProjectData {
             category: category,
             equipment: equipment,
             rating: parseFloat((row.querySelector('.rating-input') as HTMLInputElement).value) || 0,
-            units: (row.querySelector('input[type="radio"]:checked') as HTMLInputElement).value as any,
+            units: (row.querySelector('.units-select') as HTMLSelectElement).value as any,
             diversity: parseFloat((row.querySelector('.diversity-input') as HTMLInputElement).value) || 0,
             diversitySource: diversitySource,
         });
@@ -332,20 +533,29 @@ function loadFormData(data: ProjectData) {
     applianceList.innerHTML = '';
     data.appliances.forEach(app => addApplianceRow(app));
     gasEnergyContentInput.value = data.gasEnergyContent.toString();
+    updateEmptyState();
     calculate();
 }
 
 function save() {
-    const data = getFormData();
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${data.projectInfo.projectName || 'load-assessment'}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    try {
+        const data = getFormData();
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const suggestedName = `${data.projectInfo.projectName || 'load-assessment'}.json`;
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = suggestedName;
+        document.body.appendChild(a);
+        a.click();
+        
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error('Error preparing file for save:', error);
+        showToast('Error: Could not prepare the file for download.', 5000, 'error');
+    }
 }
 
 function load() {
@@ -357,7 +567,7 @@ function load() {
             const data = JSON.parse(e.target?.result as string);
             loadFormData(data);
         } catch (error) {
-            alert('Error: Could not parse file. Please ensure it is a valid JSON file.');
+            showToast('Error: Could not parse file. Please ensure it is a valid JSON file.', 5000, 'error');
             console.error(error);
         }
     };
@@ -365,119 +575,230 @@ function load() {
 }
 
 function exportToPdf() {
-    const doc = new jsPDF();
-    const data = getFormData();
-    calculate(); // Ensure calculations are fresh
-    
-    const pageHeight = doc.internal.pageSize.height;
-    let y = 15;
+    const btn = exportPdfBtn as HTMLButtonElement;
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.classList.add('loading');
+    btn.textContent = 'Generating...';
 
-    // Header
-    doc.setFontSize(18);
-    doc.setTextColor(40);
-    doc.text("Residential Load Diversity Report", 105, y, { align: 'center' });
-    y += 10;
+    setTimeout(() => {
+        try {
+            const doc = new jsPDF();
+            const data = getFormData();
+            calculate(); 
+            
+            const displayUnit = resultsUnitsSelect.value;
+            const gasEnergy = data.gasEnergyContent;
+            const pageHeight = doc.internal.pageSize.height;
+            const pageWidth = doc.internal.pageSize.width;
+            let y = 0;
 
-    // Project Details
-    doc.setFontSize(14);
-    doc.text("Project Details", 14, y);
-    y += 2;
-    autoTable(doc, {
-        startY: y,
-        body: [
-            ['Project Name', data.projectInfo.projectName],
-            ['Address', `${data.projectInfo.streetAddress}, ${data.projectInfo.town}, ${data.projectInfo.state}`],
-            ['DOC', data.projectInfo.doc],
-            ['G-Intake #', data.projectInfo.gIntake],
-            ['Assessed by', data.projectInfo.assessedBy],
-            ['Assessment Date', data.projectInfo.assessmentDate],
-            ['Revision #', `${data.projectInfo.revisionNumber} (on ${data.projectInfo.revisionDate})`],
-        ],
-        theme: 'striped',
-        styles: { fontSize: 10 }
-    });
-    // @ts-ignore
-    y = doc.lastAutoTable.finalY + 10;
+            const addHeader = (docInstance: jsPDF, pageData: ProjectData) => {
+                docInstance.setFontSize(10);
+                docInstance.setTextColor(40);
+                docInstance.setFont(undefined, 'bold');
+                docInstance.text('Residential Load Diversity Report', 14, 15);
+                docInstance.setFont(undefined, 'normal');
+                docInstance.text(`${pageData.projectInfo.projectName || 'N/A'}`, pageWidth / 2, 15, { align: 'center' });
+                docInstance.text(`${pageData.projectInfo.streetAddress || 'N/A'}`, pageWidth - 14, 15, { align: 'right' });
+                docInstance.setDrawColor(150);
+                docInstance.line(14, 18, pageWidth - 14, 18);
+            };
 
-    // Executive Summary
-    doc.setFontSize(12);
-    doc.text("Executive Summary", 14, y);
-    y += 6;
-    doc.setFontSize(10);
-    const summaryText = `This report documents the calculated natural gas load for the residential property at ${data.projectInfo.streetAddress}, ${data.projectInfo.town}, ${data.projectInfo.state}. It outlines the total connected load and the diversified load based on the listed appliances and standard diversity methodologies.`;
-    const splitSummary = doc.splitTextToSize(summaryText, 180);
-    doc.text(splitSummary, 14, y);
-    y += splitSummary.length * 4 + 10;
-    
-    // Appliance Table
-    doc.setFontSize(12);
-    doc.text("Appliance Load & Diversity Calculation", 14, y);
-    y += 2;
-    const applianceBody = data.appliances.map(app => {
-      const ratingBtu = convertToBtu(app.rating, app.units, data.gasEnergyContent);
-      return [
-        app.equipment,
-        ratingBtu.toLocaleString(),
-        `${app.diversity}%`,
-        (ratingBtu * app.diversity / 100).toLocaleString()
-      ]
-    });
-    autoTable(doc, {
-      startY: y,
-      head: [['Equipment Type', 'Max Input (BTU/hr)', 'Diversity Factor', 'Diversified Load (BTU/hr)']],
-      body: applianceBody,
-      theme: 'grid',
-      styles: { fontSize: 9 }
-    });
-    // @ts-ignore
-    y = doc.lastAutoTable.finalY + 10;
-    
-    if (y > pageHeight - 60) {
-      doc.addPage();
-      y = 20;
-    }
+            const checkPageBreak = (docInstance: jsPDF, currentY: number, requiredSpace: number) => {
+                if (currentY + requiredSpace > pageHeight - 20) {
+                    docInstance.addPage();
+                    return 25;
+                }
+                return currentY;
+            };
 
-    // Calculation Methodology
-    const standardKey = diversityStandardSelect.value;
-    const standardName = DIVERSITY_STANDARDS[standardKey] || 'the selected';
+            // Page 1: Project Details & Summary
+            addHeader(doc, data);
+            y = 25;
 
-    doc.setFontSize(12);
-    doc.text("Calculation Methodology & Sources", 14, y);
-    y += 6;
-    doc.setFontSize(10);
-    const methText = `The Diversified Load for each appliance is calculated as: Max Input Rating × (Diversity Factor / 100). The Total Diversified Load is the sum of these individual values. The default diversity factors used are representative values derived from an analysis of common North American gas utility engineering practices and are intended for estimation. Specifically, these values are consistent with methodologies found in sources such as the ASHRAE Handbook—Fundamentals. The diversity factors used in this calculation are based on the ${standardName} standard. For code-compliant sizing, factors should be verified with the local utility or a qualified engineer. Gas energy content was assumed to be ${data.gasEnergyContent} BTU/SCF.`;
-    const splitMeth = doc.splitTextToSize(methText, 180);
-    doc.text(splitMeth, 14, y);
-    y += splitMeth.length * 4 + 10;
-    
-    // Final Summary
-    doc.setFontSize(12);
-    doc.text("Final Summary", 14, y);
-    y += 2;
-    autoTable(doc, {
-        startY: y,
-        body: [
-            [{ content: 'Total Connected Load (Without Diversity)', styles: { fontStyle: 'bold' } }, `${calculatedResults.connectedBtu.toLocaleString()} BTU/hr`],
-            [{ content: 'Total Diversified Load (With Diversity)', styles: { fontStyle: 'bold' } }, `${calculatedResults.diversifiedBtu.toLocaleString()} BTU/hr`],
-        ],
-        theme: 'grid',
-        styles: { fontSize: 10 }
-    });
-    // @ts-ignore
-    y = doc.lastAutoTable.finalY + 10;
+            doc.setFontSize(14);
+            doc.text("Project Details", 14, y);
+            y += 2;
+            autoTable(doc, {
+                startY: y,
+                body: [
+                    ['Project Name', data.projectInfo.projectName],
+                    ['Address', `${data.projectInfo.streetAddress}, ${data.projectInfo.town}, ${data.projectInfo.state}`],
+                    ['DOC', data.projectInfo.doc],
+                    ['G-Intake #', data.projectInfo.gIntake],
+                    ['Assessed by', data.projectInfo.assessedBy],
+                    ['Assessment Date', data.projectInfo.assessmentDate],
+                    ['Revision #', `${data.projectInfo.revisionNumber} (on ${data.projectInfo.revisionDate})`],
+                ],
+                theme: 'striped', styles: { fontSize: 10 }
+            });
+            // @ts-ignore
+            y = doc.lastAutoTable.finalY + 10;
+
+            // Appliance List
+            y = checkPageBreak(doc, y, 60);
+            doc.setFontSize(12);
+            doc.text("Appliance List & Individual Loads", 14, y);
+            y += 6;
+            const applianceBody = data.appliances.map(app => {
+                const ratingBtu = convertToBtu(app.rating, app.units, gasEnergy);
+                const diversifiedBtu = ratingBtu * app.diversity / 100;
+                const displayRating = convertFromBtu(ratingBtu, displayUnit, gasEnergy);
+                const displayDiversified = convertFromBtu(diversifiedBtu, displayUnit, gasEnergy);
+                return [
+                    app.equipment,
+                    displayRating.toLocaleString(undefined, { maximumFractionDigits: 2 }),
+                    `${app.diversity}%`,
+                    displayDiversified.toLocaleString(undefined, { maximumFractionDigits: 2 })
+                ];
+            });
+            autoTable(doc, {
+                startY: y,
+                head: [['Equipment Type', `Max Input (${displayUnit})`, 'Diversity Factor', `Diversified Load (${displayUnit})`]],
+                body: applianceBody,
+                theme: 'grid', styles: { fontSize: 9 }
+            });
+            // @ts-ignore
+            y = doc.lastAutoTable.finalY + 10;
+            
+            // Detailed Calculation Analysis
+            y = checkPageBreak(doc, y, 100);
+            if(y === 25) doc.addPage();
+            doc.setFontSize(14);
+            doc.text("Detailed Load Calculation Analysis", 14, y);
+            y += 10;
+
+            const formatVal = (val: number) => val.toLocaleString(undefined, {maximumFractionDigits: 2});
+            const winterApps = data.appliances.filter(a => SEASONAL_USAGE[a.category] === 'winter');
+            const summerApps = data.appliances.filter(a => SEASONAL_USAGE[a.category] === 'summer');
+            const yearRoundApps = data.appliances.filter(a => SEASONAL_USAGE[a.category] === 'year-round' || !SEASONAL_USAGE[a.category]);
+
+            const generateSeasonalTable = (title: string, apps: ApplianceState[]) => {
+                let subtotal = 0;
+                const body = apps.map(app => {
+                    const ratingBtu = convertToBtu(app.rating, app.units, gasEnergy);
+                    const diversifiedBtu = ratingBtu * (app.diversity / 100);
+                    const displayDiv = convertFromBtu(diversifiedBtu, displayUnit, gasEnergy);
+                    subtotal += displayDiv;
+                    return [
+                        app.equipment,
+                        `${formatVal(convertFromBtu(ratingBtu, displayUnit, gasEnergy))} ${displayUnit}`,
+                        `${app.diversity}%`,
+                        `${formatVal(displayDiv)} ${displayUnit}`
+                    ];
+                });
+                autoTable(doc, {
+                    startY: y,
+                    head: [[{ content: title, colSpan: 4, styles: { fontStyle: 'bold', fillColor: '#e9ecef', textColor: '#212529' } }]],
+                    body: body.length > 0 ? body : [['No appliances in this category', '', '', '']],
+                    foot: [[{ content: 'Subtotal', colSpan: 3, styles: { halign: 'right', fontStyle: 'bold' } }, { content: `${formatVal(subtotal)} ${displayUnit}`, styles: { fontStyle: 'bold' } }]],
+                    theme: 'grid', styles: { fontSize: 9 }, headStyles: { halign: 'center' }
+                });
+                // @ts-ignore
+                y = doc.lastAutoTable.finalY;
+                return subtotal;
+            };
+
+            doc.setFontSize(12);
+            doc.text("Winter Peak Calculation", 14, y);
+            y += 6;
+            const winterSub = generateSeasonalTable('Winter Loads', winterApps);
+            y = checkPageBreak(doc, y, 40) + 2;
+            const yrSub1 = generateSeasonalTable('Year-Round Loads', yearRoundApps);
+            const winterTotal = winterSub + yrSub1;
+            y = checkPageBreak(doc, y, 15) + 8;
+            doc.setFontSize(10);
+            doc.setFillColor('#e7f1ff');
+            doc.rect(14, y - 4.5, pageWidth - 28, 12, 'F');
+            doc.text(`Total Winter Peak = ${formatVal(winterSub)} (${'Winter'}) + ${formatVal(yrSub1)} (${'Year-Round'}) = `, 16, y);
+            doc.setFont(undefined, 'bold');
+            doc.text(`${formatVal(winterTotal)} ${displayUnit}`, doc.getTextWidth(`Total Winter Peak = ${formatVal(winterSub)} (Winter) + ${formatVal(yrSub1)} (Year-Round) = `) + 16, y);
+            doc.setFont(undefined, 'normal');
+            y += 15;
+
+            y = checkPageBreak(doc, y, 100);
+            doc.setFontSize(12);
+            doc.text("Summer Peak Calculation", 14, y);
+            y += 6;
+            const summerSub = generateSeasonalTable('Summer Loads', summerApps);
+            y = checkPageBreak(doc, y, 40) + 2;
+            const yrSub2 = generateSeasonalTable('Year-Round Loads', yearRoundApps);
+            const summerTotal = summerSub + yrSub2;
+            y = checkPageBreak(doc, y, 15) + 8;
+            doc.setFontSize(10);
+            doc.setFillColor('#e7f1ff');
+            doc.rect(14, y - 4.5, pageWidth - 28, 12, 'F');
+            doc.text(`Total Summer Peak = ${formatVal(summerSub)} (${'Summer'}) + ${formatVal(yrSub2)} (${'Year-Round'}) = `, 16, y);
+            doc.setFont(undefined, 'bold');
+            doc.text(`${formatVal(summerTotal)} ${displayUnit}`, doc.getTextWidth(`Total Summer Peak = ${formatVal(summerSub)} (Summer) + ${formatVal(yrSub2)} (Year-Round) = `) + 16, y);
+            doc.setFont(undefined, 'normal');
+            y += 15;
 
 
-    // Footer on all pages
-    const pageCount = (doc as any).internal.getNumberOfPages();
-    for(let i = 1; i <= pageCount; i++) {
-        doc.setPage(i);
-        doc.setFontSize(8);
-        doc.setTextColor(150);
-        doc.text(`Report generated on ${new Date().toLocaleDateString()}`, 14, pageHeight - 10);
-        doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.width - 35, pageHeight - 10);
-    }
-    
-    doc.save(`${data.projectInfo.projectName || 'load-report'}.pdf`);
+            // Load Summary
+            y = checkPageBreak(doc, y, 60);
+            doc.setFontSize(14);
+            doc.text("Final Load Summary", 14, y);
+            y += 6;
+            autoTable(doc, {
+                startY: y,
+                body: [
+                    [{ content: 'Total Connected Load', styles: { fontStyle: 'bold' } }, `${formatVal(convertFromBtu(calculatedResults.connectedBtu, displayUnit, gasEnergy))} ${displayUnit}`],
+                    ['Winter Peak (Diversified)', `${formatVal(winterTotal)} ${displayUnit}`],
+                    ['Summer Peak (Diversified)', `${formatVal(summerTotal)} ${displayUnit}`],
+                    [{ content: 'Design Load (Worst Case)', styles: { fontStyle: 'bold', fillColor: '#d3e5ff' } }, { content: `${formatVal(convertFromBtu(calculatedResults.diversifiedBtu, displayUnit, gasEnergy))} ${displayUnit}`, styles: { fontStyle: 'bold', fillColor: '#d3e5ff' }}],
+                ],
+                theme: 'grid', styles: { fontSize: 10 }
+            });
+            // @ts-ignore
+            y = doc.lastAutoTable.finalY + 10;
+
+            // Methodology & Disclaimer
+            y = checkPageBreak(doc, y, 150);
+            const standardKey = diversityStandardSelect.value;
+            const standardName = DIVERSITY_STANDARDS[standardKey] || 'the selected';
+            doc.setFontSize(12);
+            doc.text("Calculation Methodology & Sources", 14, y);
+            y += 6;
+            doc.setFontSize(10);
+            const methText = `The Diversified Load for each appliance is calculated as: Max Input Rating × (Diversity Factor / 100). The Design Load is the greater of the Winter and Summer peak loads. The diversity factors used in this calculation are based on the ${standardName} standard. For code-compliant sizing, factors should be verified with the local utility or a qualified engineer. Gas energy content was assumed to be ${data.gasEnergyContent} BTU/ft³.`;
+            doc.text(doc.splitTextToSize(methText, 180), 14, y);
+            y += doc.splitTextToSize(methText, 180).length * 4 + 10;
+
+            y = checkPageBreak(doc, y, 70);
+            doc.setFontSize(12);
+            doc.text("Important Disclaimer", 14, y);
+            y += 6;
+            doc.setFontSize(9);
+            const disclaimerText = `This report is an estimation tool intended for sizing of UTILITY-OWNED ASSETS (service line, meter, regulator) only. The diversity factors used are standard engineering practice for this purpose. Sizing of CUSTOMER-OWNED interior gas piping is governed by NFPA 54 (National Fuel Gas Code), as adopted by the local Authority Having Jurisdiction (AHJ). NFPA 54 generally requires piping to be sized for the maximum connected load of all appliances. The diversity factors in this report MUST NOT be used for interior piping design unless explicitly permitted by the AHJ. All final designs must be verified by a qualified professional and approved by the local gas utility.`;
+            const splitDisclaimer = doc.splitTextToSize(disclaimerText, 180);
+            doc.setDrawColor(150);
+            doc.rect(12, y - 2, 186, splitDisclaimer.length * 3.5 + 4);
+            doc.setTextColor(80);
+            doc.text(splitDisclaimer, 14, y);
+
+            // Add Headers and Footers to all pages
+            const pageCount = (doc as any).internal.getNumberOfPages();
+            for(let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                addHeader(doc, data);
+                doc.setFontSize(8);
+                doc.setTextColor(150);
+                doc.text(`Report generated on ${new Date().toLocaleDateString()}`, 14, pageHeight - 10);
+                doc.text(`Page ${i} of ${pageCount}`, pageWidth - 35, pageHeight - 10);
+            }
+            
+            doc.save(`${data.projectInfo.projectName || 'load-report'}.pdf`);
+        } catch (error) {
+            console.error("Failed to generate PDF:", error);
+            showToast('There was an error generating the PDF.', 5000, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.classList.remove('loading');
+            btn.textContent = originalText;
+        }
+    }, 50);
 }
 
 function createDiversityTable() {
@@ -560,12 +881,54 @@ function setupEventListeners() {
         }
     });
 
-    addApplianceBtn.addEventListener('click', () => addApplianceRow());
+    // Accordion logic
+    const accordionHeader = document.querySelector('#project-info .accordion-header');
+    accordionHeader?.addEventListener('click', () => {
+        const accordion = accordionHeader.closest('.accordion');
+        if (accordion) {
+            const isExpanded = accordion.classList.contains('open');
+            accordionHeader.setAttribute('aria-expanded', String(!isExpanded));
+            accordion.classList.toggle('open');
+        }
+    });
+
+    // Quick Start guide dismiss logic
+    const dismissBtn = document.getElementById('dismiss-guide-btn');
+    const guide = document.getElementById('quick-start-guide');
+    dismissBtn?.addEventListener('click', () => {
+        if (guide) {
+            guide.style.display = 'none';
+        }
+    });
+
+    // Debounce function for performance on frequent inputs
+    const debounce = (func: (...args: any[]) => void, delay: number) => {
+        let timeoutId: number;
+        return (...args: any[]) => {
+            clearTimeout(timeoutId);
+            timeoutId = window.setTimeout(() => func(...args), delay);
+        };
+    };
+    const debouncedCalculate = debounce(calculate, 300);
+
+    addApplianceBtn.addEventListener('click', () => {
+        addApplianceRow();
+        updateEmptyState();
+        calculate();
+    });
     
     applianceList.addEventListener('click', (e) => {
         const target = e.target as HTMLElement;
         if (target.classList.contains('remove-btn')) {
-            target.closest('.appliance-row')?.remove();
+            const rowToRemove = target.closest('.appliance-row');
+            if(rowToRemove) {
+                rowToRemove.classList.remove('show');
+                rowToRemove.addEventListener('transitionend', () => {
+                    rowToRemove.remove();
+                    updateEmptyState();
+                    calculate();
+                }, { once: true });
+            }
         }
     });
 
@@ -604,18 +967,42 @@ function setupEventListeners() {
                 diversityInput.value = CATEGORY_DIVERSITY_DEFAULTS[sourceCategory][standard].toString();
             }
         }
+        calculate(); // Recalculate after any select/radio change
     });
 
-    calculateBtn.addEventListener('click', calculate);
-    resultsUnitsSelect.addEventListener('change', updateResultDisplay);
-    gasEnergyContentInput.addEventListener('change', updateResultDisplay);
-    diversityStandardSelect.addEventListener('change', updateAllDiversityFactors);
+    applianceList.addEventListener('input', (e) => {
+        const target = e.target as HTMLElement;
+        if (target.classList.contains('rating-input') || 
+            target.classList.contains('diversity-input') || 
+            target.classList.contains('custom-equipment-input')) 
+        {
+            debouncedCalculate();
+        }
+    });
+
+    resultsUnitsSelect.addEventListener('change', () => {
+        updateResultDisplay();
+        updateCalculationDetails();
+    });
+    gasEnergyContentInput.addEventListener('input', debouncedCalculate);
+    diversityStandardSelect.addEventListener('change', () => {
+        updateAllDiversityFactors();
+        calculate();
+        updateMethodologyDisplay();
+    });
     
     saveBtn.addEventListener('click', save);
     loadBtn.addEventListener('click', () => loadInput.click());
     loadInput.addEventListener('change', load);
     
     exportPdfBtn.addEventListener('click', exportToPdf);
+
+    showDetailsBtn.addEventListener('click', () => {
+        const isVisible = calculationDetailsEl.classList.contains('visible');
+        calculationDetailsEl.classList.toggle('visible');
+        showDetailsBtn.textContent = isVisible ? 'Show Calculation Details' : 'Hide Calculation Details';
+        showDetailsBtn.setAttribute('aria-expanded', String(!isVisible));
+    });
 }
 
 // --- INITIALIZATION ---
@@ -626,6 +1013,8 @@ function init() {
     
     createDiversityTable();
     setupEventListeners();
+    updateEmptyState();
+    updateMethodologyDisplay();
 }
 
 init();
